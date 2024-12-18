@@ -1,5 +1,5 @@
 [workspace]
-members = ["user_service"
+members = ["users"
 ]
 
 

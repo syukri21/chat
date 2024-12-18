@@ -29,12 +29,12 @@ impl User {
         }
     }
 
-    // Method to deactivate the user
+    // Method to deactivate the users
     pub fn deactivate(&mut self) {
         self.is_active = false;
     }
 
-    // Method to activate the user
+    // Method to activate the users
     pub fn activate(&mut self) {
         self.is_active = true;
     }
