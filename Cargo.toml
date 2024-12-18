@@ -1,5 +1,5 @@
 [workspace]
-members = [ "credentials","persistence", "users"
+members = [ "credentials","persistence", "tests", "users"
 ]
 
 

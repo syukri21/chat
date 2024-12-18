@@ -1,0 +1,14 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+persistence = {path = "../persistence"}
+users = {path = "../users"}
+credentials = {path = "../credentials"}
