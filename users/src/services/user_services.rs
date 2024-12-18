@@ -93,7 +93,7 @@ impl UserService {
             .fetch_one(&mut *tx)
             .await;
         if !result.is_ok() {
-            return Err(anyhow::format_err!("Something went wrongj"));
+            return Err(anyhow::format_err!("Something went wrong"));
         }
 
         let row = result?;
