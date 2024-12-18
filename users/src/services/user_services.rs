@@ -1,8 +1,9 @@
 use crate::models::user::User;
 use chrono::NaiveDateTime;
 use persistence::DatabaseInterface;
-use std::sync::Arc;
+use sqlx::sqlite::SqliteRow;
 use sqlx::Row;
+use std::sync::Arc;
 use uuid::Uuid;
 
 pub struct UserService {
@@ -13,7 +14,6 @@ impl UserService {
     pub fn new(db: Arc<dyn DatabaseInterface>) -> Self {
         Self { db }
     }
-
     pub async fn create_user(&self, user: User) -> anyhow::Result<i64> {
         let mut connection = self.db.get_pool().acquire().await?;
 
@@ -37,8 +37,7 @@ impl UserService {
 
         Ok(id)
     }
-
-    pub async fn get_user(&self, id: Uuid) -> anyhow::Result<User> {
+    pub async fn get_user_by_uuid(&self, id: Uuid) -> anyhow::Result<User> {
         let mut connection = self.db.get_pool().acquire().await?;
 
         let query = r#"SELECT
@@ -59,6 +58,31 @@ impl UserService {
             .fetch_one(&mut *connection)
             .await?;
 
+        Self::row_to_user(row)
+    }
+    pub async fn get_user_by_username(&self, username: &str) -> anyhow::Result<User> {
+        let mut connection = self.db.get_pool().acquire().await?;
+        let query = r#"SELECT
+            id,
+            username,
+            email,
+            password,
+            is_active,
+            pub_key,
+            created_at,
+            updated_at,
+            deleted_at
+            FROM users
+            WHERE username = ?"#;
+        let row = sqlx::query(query)
+            .bind(username.to_string())
+            .fetch_one(&mut *connection)
+            .await?;
+
+        Self::row_to_user(row)
+    }
+
+    fn row_to_user(row: SqliteRow) ->  anyhow::Result<User>{
         let user = User {
             id: row.try_get::<String, _>("id")?.parse()?,
             username: row.try_get("username")?,
@@ -122,7 +146,7 @@ mod tests {
             assert_eq!(result.unwrap(), 2);
         }
     }
-    
+
     #[tokio::test]
     async fn test_get_user_by_userid() {
         let db = setup().await;
@@ -139,7 +163,10 @@ mod tests {
         assert!(result.is_ok());
 
         // Now, fetch the user by ID
-        let fetched_user = user_service.get_user(created_user.id).await.unwrap();
+        let fetched_user = user_service
+            .get_user_by_uuid(created_user.id)
+            .await
+            .unwrap();
 
         // Assert that fetched user matches the created user's details
         assert_eq!(fetched_user.id, fetched_user.id);
@@ -153,6 +180,36 @@ mod tests {
         assert!(fetched_user.created_at.is_some());
         assert!(fetched_user.updated_at.is_some());
         assert!(fetched_user.deleted_at.is_none());
-        
+    }
+
+    #[tokio::test]
+    async fn test_get_user_by_username() {
+        let db = setup().await;
+        let user_service = UserService::new(db);
+
+        // First, create a user to test retrieving it
+        let created_user = User::new(
+            String::from("testuser"),
+            String::from("testuser@test.com"),
+            String::from("testpassword"),
+            String::from("testpubkey"),
+        );
+        let result = user_service.create_user(created_user.clone()).await;
+        assert!(result.is_ok());
+
+        // Now, fetch the user by username
+        let fetched_user = user_service.get_user_by_username("testuser").await.unwrap();
+
+        // Assert that fetched user matches the created user's details
+        assert_eq!(fetched_user.username, created_user.username);
+        assert_eq!(fetched_user.email, created_user.email);
+        assert_eq!(fetched_user.password, created_user.password);
+        assert_eq!(fetched_user.pub_key, created_user.pub_key);
+        assert_eq!(fetched_user.is_active, created_user.is_active);
+
+        // Check that created_at and updated_at are not None
+        assert!(fetched_user.created_at.is_some());
+        assert!(fetched_user.updated_at.is_some());
+        assert!(fetched_user.deleted_at.is_none());
     }
 }
