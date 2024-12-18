@@ -1,10 +1,10 @@
-use crate::models::user::User;
 use chrono::NaiveDateTime;
 use persistence::DatabaseInterface;
 use sqlx::sqlite::SqliteRow;
 use sqlx::{Acquire, Row};
 use std::sync::Arc;
 use uuid::Uuid;
+use crate::user::User;
 
 pub struct UserService {
     db: Arc<dyn DatabaseInterface>,
@@ -138,6 +138,7 @@ impl UserService {
 mod tests {
     use super::*;
     use persistence::{Env, DB};
+    use crate::user::User;
 
     async fn setup() -> Arc<dyn DatabaseInterface> {
         let db_path = ":memory:"; // Use an in-memory database for tests
