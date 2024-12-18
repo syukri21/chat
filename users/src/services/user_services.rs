@@ -2,7 +2,7 @@ use crate::models::user::User;
 use chrono::NaiveDateTime;
 use persistence::DatabaseInterface;
 use sqlx::sqlite::SqliteRow;
-use sqlx::Row;
+use sqlx::{Acquire, Row};
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -82,7 +82,44 @@ impl UserService {
         Self::row_to_user(row)
     }
 
-    fn row_to_user(row: SqliteRow) ->  anyhow::Result<User>{
+    pub async fn activate_user(&self, id: Uuid) -> anyhow::Result<()> {
+        let mut connection = self.db.get_pool().acquire().await?;
+        let mut tx = connection.begin().await?;
+
+        let query = r#"
+        SELECT count(1) as count FROM users WHERE id = ?"#;
+        let result = sqlx::query(query)
+            .bind(id.to_string())
+            .fetch_one(&mut *tx)
+            .await;
+        if !result.is_ok() {
+            return Err(anyhow::format_err!("Something went wrongj"));
+        }
+
+        let row = result?;
+        let count :i64= row.try_get("count")?;
+
+        if count == 0 {
+            return Err(anyhow::format_err!("User with userid {} not found!!!", id.to_string()))
+        }
+
+        let update_query = r#"
+            UPDATE users
+            SET is_active = true,
+                updated_at = ?
+            WHERE id = ?"#;
+
+        sqlx::query(update_query)
+            .bind(chrono::Utc::now().naive_utc())
+            .bind(id.to_string())
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+        Ok(())
+    }
+
+    fn row_to_user(row: SqliteRow) -> anyhow::Result<User> {
         let user = User {
             id: row.try_get::<String, _>("id")?.parse()?,
             username: row.try_get("username")?,
@@ -211,5 +248,30 @@ mod tests {
         assert!(fetched_user.created_at.is_some());
         assert!(fetched_user.updated_at.is_some());
         assert!(fetched_user.deleted_at.is_none());
+    }
+
+    #[tokio::test]
+    async fn test_activate_eligible_user()  {
+        let db = setup().await;
+        let user_service = UserService::new(db);
+
+        // First, create a user to test activating them
+        let created_user = User::new(
+            String::from("testactivateuser"),
+            String::from("testactivateuser@test.com"),
+            String::from("testpassword"),
+            String::from("testpubkey"),
+        );
+        let result = user_service.create_user(created_user.clone()).await;
+        assert!(result.is_ok());
+
+        // Activate the user
+        let activation_result = user_service.activate_user(created_user.id).await;
+        assert!(activation_result.is_ok());
+
+        // Fetch the user and check if they are activated
+        let activated_user = user_service.get_user_by_uuid(created_user.id).await.unwrap();
+        assert!(activated_user.is_active);
+        
     }
 }
