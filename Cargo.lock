@@ -231,6 +231,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
 
 [[package]]
+name = "credentials"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "persistence",
+ "sqlx",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "crossbeam-queue"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
