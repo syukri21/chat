@@ -18,15 +18,14 @@ impl UserService {
         let mut connection = self.db.get_pool().acquire().await?;
 
         let query = r#"INSERT INTO users (
-            id, username, email, password, pub_key, is_active, created_at, updated_at, deleted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
+            id, username, email, password,  is_active, created_at, updated_at, deleted_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"#;
 
         let id = sqlx::query(query)
             .bind(user.id.to_string())
             .bind(user.username)
             .bind(user.email)
             .bind(user.password) // Missing binding for password field
-            .bind(user.pub_key) // Missing binding for pub_key field
             .bind(user.is_active) // Missing binding for is_active field
             .bind(user.created_at.map(|dt| dt)) // Set created_at, using provided or default value
             .bind(user.updated_at.map(|dt| dt))
@@ -46,7 +45,6 @@ impl UserService {
             email,
             password,
             is_active,
-            pub_key,
             created_at,
             updated_at,
             deleted_at
@@ -68,7 +66,6 @@ impl UserService {
             email,
             password,
             is_active,
-            pub_key,
             created_at,
             updated_at,
             deleted_at
@@ -129,7 +126,6 @@ impl UserService {
             email: row.try_get("email")?,
             password: row.try_get("password")?,
             is_active: row.try_get("is_active")?,
-            pub_key: row.try_get("pub_key")?,
             created_at: row.try_get("created_at")?,
             updated_at: row.try_get("updated_at")?,
             deleted_at: row.try_get("deleted_at").ok(),
@@ -169,7 +165,6 @@ mod tests {
                 String::from("testnumber1"),
                 String::from("testnumber1@test.com"),
                 String::from("testpassword"),
-                String::from("testpubkey"),
             );
             let result = user_service.create_user(user).await;
             assert_eq!(result.unwrap(), 1);
@@ -180,7 +175,6 @@ mod tests {
                 String::from("testnumber2"),
                 String::from("testnumber2@test.com"),
                 String::from("testpassword"),
-                String::from("testpubkey"),
             );
             let result = user_service.create_user(user).await;
             assert_eq!(result.unwrap(), 2);
@@ -197,7 +191,6 @@ mod tests {
             String::from("test_get_user"),
             String::from("test_get_user@test.com"),
             String::from("testpassword"),
-            String::from("testpubkey"),
         );
         let result = user_service.create_user(created_user.clone()).await;
         assert!(result.is_ok());
@@ -213,7 +206,6 @@ mod tests {
         assert_eq!(fetched_user.username, created_user.username);
         assert_eq!(fetched_user.email, created_user.email);
         assert_eq!(fetched_user.password, created_user.password);
-        assert_eq!(fetched_user.pub_key, created_user.pub_key);
         assert_eq!(fetched_user.is_active, created_user.is_active);
 
         // Check that created_at and updated_at are not None
@@ -232,7 +224,6 @@ mod tests {
             String::from("testuser"),
             String::from("testuser@test.com"),
             String::from("testpassword"),
-            String::from("testpubkey"),
         );
         let result = user_service.create_user(created_user.clone()).await;
         assert!(result.is_ok());
@@ -244,7 +235,6 @@ mod tests {
         assert_eq!(fetched_user.username, created_user.username);
         assert_eq!(fetched_user.email, created_user.email);
         assert_eq!(fetched_user.password, created_user.password);
-        assert_eq!(fetched_user.pub_key, created_user.pub_key);
         assert_eq!(fetched_user.is_active, created_user.is_active);
 
         // Check that created_at and updated_at are not None
@@ -263,7 +253,6 @@ mod tests {
             String::from("testactivateuser"),
             String::from("testactivateuser@test.com"),
             String::from("testpassword"),
-            String::from("testpubkey"),
         );
         let result = user_service.create_user(created_user.clone()).await;
         assert!(result.is_ok());

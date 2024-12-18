@@ -5,7 +5,6 @@ CREATE TABLE users
     username   VARCHAR(255) NOT NULL,
     email      VARCHAR(255) NOT NULL UNIQUE,
     password   TEXT         NOT NULL,
-    pub_key    TEXT         NOT NULL,
     is_active  BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
