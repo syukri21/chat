@@ -14,17 +14,17 @@ pub struct User {
 
 impl User {
     // Constructor to create a new User with a generated Uuid
-    pub fn new(username: String, email: String, password: String) -> Self {
-        Self {
+    pub fn new(username: String, email: String, password: String) -> anyhow::Result<Self> {
+        Ok(Self {
             id: Uuid::new_v4(),
             username,
             email,
-            password,
+            password: bcrypt::hash(password, bcrypt::DEFAULT_COST)?,
             is_active: false, // User starts as inactive until explicitly activated
             created_at: Some(chrono::Local::now().naive_local()),
             updated_at: Some(chrono::Local::now().naive_local()),
             deleted_at: None,
-        }
+        })
     }
 
     // Method to deactivate the users

@@ -15,7 +15,7 @@ mod tests {
             String::from("testnumber1"),
             String::from("testnumber1@test.com"),
             String::from("testpassword"),
-        );
+        ).unwrap();
         let user_id = user.id.clone();
         let result = user_service.create_user(user).await;
         assert_eq!(result.unwrap(), 1);

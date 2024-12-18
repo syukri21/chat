@@ -13,7 +13,7 @@ mod tests {
                 String::from("testnumber1"),
                 String::from("testnumber1@test.com"),
                 String::from("testpassword"),
-            );
+            ).unwrap();
             let result = user_service.create_user(user).await;
             assert_eq!(result.unwrap(), 1);
         }
@@ -23,7 +23,7 @@ mod tests {
                 String::from("testnumber2"),
                 String::from("testnumber2@test.com"),
                 String::from("testpassword"),
-            );
+            ).unwrap();
             let result = user_service.create_user(user).await;
             assert_eq!(result.unwrap(), 2);
         }
@@ -39,7 +39,7 @@ mod tests {
             String::from("test_get_user"),
             String::from("test_get_user@test.com"),
             String::from("testpassword"),
-        );
+        ).unwrap();
         let result = user_service.create_user(created_user.clone()).await;
         assert!(result.is_ok());
 
@@ -72,7 +72,7 @@ mod tests {
             String::from("testuser"),
             String::from("testuser@test.com"),
             String::from("testpassword"),
-        );
+        ).unwrap();
         let result = user_service.create_user(created_user.clone()).await;
         assert!(result.is_ok());
 
@@ -101,7 +101,7 @@ mod tests {
             String::from("testactivateuser"),
             String::from("testactivateuser@test.com"),
             String::from("testpassword"),
-        );
+        ).unwrap();
         let result = user_service.create_user(created_user.clone()).await;
         assert!(result.is_ok());
 

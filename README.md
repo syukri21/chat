@@ -6,7 +6,7 @@ This section explains how to configure your database connection using environmen
 
 ```text
 # Set the database URL, which includes the connection string and file name for the SQLite database
-DATABASE_URL=sqlite://app.db?mode=rw
+DATABASE_URL=sqlite://app.DB?mode=rw
 
 # Set the database password (if applicable or needed for secure access)
 DB_PASSWORD=mysecretpassword
@@ -14,13 +14,13 @@ DB_PASSWORD=mysecretpassword
 
 The above script sets up two environment variables:
 
-- `DATABASE_URL`: Defines the SQLite database file (`app.db`) and opens it in `read-write` mode.
+- `DATABASE_URL`: Defines the SQLite database file (`app.DB`) and opens it in `read-write` mode.
 - `DB_PASSWORD`: A placeholder for your database password, ensuring secure access (if required by your setup).
 
 Be sure to replace `mysecretpassword` with a strong and secure password for production systems.
 ```bash
 
-sqlx db create 
+sqlx DB create 
 ```
 
 
