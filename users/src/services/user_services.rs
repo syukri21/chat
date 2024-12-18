@@ -97,10 +97,13 @@ impl UserService {
         }
 
         let row = result?;
-        let count :i64= row.try_get("count")?;
+        let count: i64 = row.try_get("count")?;
 
         if count == 0 {
-            return Err(anyhow::format_err!("User with userid {} not found!!!", id.to_string()))
+            return Err(anyhow::format_err!(
+                "User with userid {} not found!!!",
+                id.to_string()
+            ));
         }
 
         let update_query = r#"
@@ -251,7 +254,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_activate_eligible_user()  {
+    async fn test_activate_eligible_user() {
         let db = setup().await;
         let user_service = UserService::new(db);
 
@@ -270,8 +273,28 @@ mod tests {
         assert!(activation_result.is_ok());
 
         // Fetch the user and check if they are activated
-        let activated_user = user_service.get_user_by_uuid(created_user.id).await.unwrap();
+        let activated_user = user_service
+            .get_user_by_uuid(created_user.id)
+            .await
+            .unwrap();
         assert!(activated_user.is_active);
-        
+    }
+    #[tokio::test]
+    async fn test_activate_user_id_not_found() {
+        let db = setup().await;
+        let user_service = UserService::new(db);
+
+        // Attempt to activate a user with a non-existent ID
+        let nonexistent_id = uuid::Uuid::new_v4(); // Generate a random UUID for test
+        let activation_result = user_service.activate_user(nonexistent_id).await;
+
+        // Assert that the operation failed with the expected error
+        assert!(activation_result.is_err());
+
+        // Extract the error and check its content
+        let error_message = activation_result.unwrap_err().to_string();
+        assert!(error_message.contains("User with userid"));
+        assert!(error_message.contains("not found"));
+        assert!(error_message.contains(nonexistent_id.to_string().as_str()));
     }
 }
