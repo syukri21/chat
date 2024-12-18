@@ -280,7 +280,7 @@ mod tests {
         assert!(activated_user.is_active);
     }
     #[tokio::test]
-    async fn test_activate_user_id_not_found() {
+    async fn test_activate_user_id_not_found_should_fail() {
         let db = setup().await;
         let user_service = UserService::new(db);
 
