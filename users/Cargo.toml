@@ -1,5 +1,5 @@
 [package]
-name = "user_service"
+name = "users"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,4 +9,6 @@ edition = "2021"
 tokio.workspace = true
 uuid.workspace = true
 chrono.workspace = true
-
+anyhow.workspace = true
+sqlx.workspace = true
+persistence = {path = "../persistence"}
