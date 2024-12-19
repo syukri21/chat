@@ -2,11 +2,11 @@
 mod tests {
     use users::user::User;
     use users::user_services::UserService;
-    use crate::utils::setup;
+    use crate::utils::setup_db;
 
     #[tokio::test]
     async fn test_create_user() {
-        let db = setup().await;
+        let db = setup_db().await;
         let user_service = UserService::new(db);
 
         let user = User::new(
@@ -32,7 +32,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_user_by_userid() {
-        let db = setup().await;
+        let db = setup_db().await;
         let user_service = UserService::new(db);
 
         let user = User::new(
@@ -58,7 +58,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_user_by_username() {
-        let db = setup().await;
+        let db = setup_db().await;
         let user_service = UserService::new(db);
 
         let user = User::new(
@@ -83,7 +83,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_activate_eligible_user() {
-        let db = setup().await;
+        let db = setup_db().await;
         let user_service = UserService::new(db);
 
         let user = User::new(
@@ -105,7 +105,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_activate_user_id_not_found_should_fail() {
-        let db = setup().await;
+        let db = setup_db().await;
         let user_service = UserService::new(db);
 
         let nonexistent_id = uuid::Uuid::new_v4();

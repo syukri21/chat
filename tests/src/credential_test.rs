@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::utils::setup;
+    use crate::utils::setup_db;
     use credentials::credential::Credential;
     use credentials::credential_services::CredentialService;
     use std::sync::Arc;
@@ -9,7 +9,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_credential_and_get_credential_by_user_id() {
-        let db = setup().await;
+        let db = setup_db().await;
         let user_service = UserService::new(Arc::clone(&db));
         let user = User::new(
             String::from("testnumber1"),

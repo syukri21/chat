@@ -75,6 +75,7 @@ impl RegisterUseCase {
 pub trait RegisterUseCaseInterface {
     async fn register<'a>(&self, request: &RegisterRequest<'a>)
         -> anyhow::Result<RegisterResponse>;
+    async fn activate_user<'a>(&self, encrypted_user_id: &'a str) -> anyhow::Result<()>;
 }
 
 #[async_trait]
@@ -93,7 +94,14 @@ impl RegisterUseCaseInterface for RegisterUseCase {
             .create_credential(&credential)
             .await?;
 
+        // TODO: add email crate
+
         Ok(RegisterResponse {})
+    }
+
+    async fn activate_user(&self, encrypted_user_id: &str) -> anyhow::Result<()> {
+        // TODO: add encryption crate
+        todo!()
     }
 }
 

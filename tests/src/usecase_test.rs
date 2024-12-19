@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::utils::setup;
+    use crate::utils::setup_db;
     use credentials::credential_services::CredentialService;
     use std::sync::Arc;
     use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
@@ -8,7 +8,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_register_usecase() {
-        let db = setup().await;
+        let db = setup_db().await;
         let user_service = Arc::new(UserService::new(Arc::clone(&db)));
         let credential_service = Arc::new(CredentialService::new(Arc::clone(&db)));
         let register_usecase =
