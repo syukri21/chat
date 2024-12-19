@@ -1687,6 +1687,7 @@ dependencies = [
  "persistence",
  "sqlx",
  "tokio",
+ "usecases",
  "users",
  "uuid",
 ]
@@ -1856,6 +1857,21 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+]
+
+[[package]]
+name = "usecases"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "credentials",
+ "persistence",
+ "sqlx",
+ "tokio",
+ "users",
+ "uuid",
 ]
 
 [[package]]

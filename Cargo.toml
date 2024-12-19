@@ -1,5 +1,6 @@
 [workspace]
-members = [ "credentials","persistence", "tests", "users"
+resolver = "2"
+members = [ "credentials","persistence", "tests", "usecases", "users"
 ]
 
 

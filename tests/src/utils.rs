@@ -2,7 +2,7 @@ use persistence::{DatabaseInterface, Env, DB};
 use std::sync::Arc;
 
 #[allow(dead_code)]
-pub(crate) async fn setup() -> Arc<dyn DatabaseInterface> {
+pub(crate) async fn setup() -> Arc<dyn DatabaseInterface + Send + Sync> {
     let db_path = ":memory:"; // Use an in-memory database for tests
     let env = Env {
         db_url: format!("sqlite:{}", db_path),

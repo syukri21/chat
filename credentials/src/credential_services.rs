@@ -4,15 +4,15 @@ use sqlx::Row;
 use std::sync::Arc;
 
 pub struct CredentialService {
-    db: Arc<dyn DatabaseInterface>,
+    db: Arc<dyn DatabaseInterface + Send + Sync>,
 }
 
 impl CredentialService {
-    pub fn new(db: Arc<dyn DatabaseInterface>) -> Self {
+    pub fn new(db: Arc<dyn DatabaseInterface + Send + Sync>) -> Self {
         Self { db }
     }
     
-    pub async fn create_credential(&self, credential: Credential) -> anyhow::Result<()> {
+    pub async fn create_credential(&self, credential: &Credential) -> anyhow::Result<()> {
         let mut connection = self.db.get_pool().acquire().await?;
         let query = r#"
             INSERT INTO credentials (
@@ -29,9 +29,9 @@ impl CredentialService {
         sqlx::query(query)
             .bind(credential.id.to_string())
             .bind(credential.user_id.to_string())
-            .bind(credential.public_key)
-            .bind(credential.private_key)
-            .bind(credential.r#type)
+            .bind(&credential.public_key)
+            .bind(&credential.private_key)
+            .bind(&credential.r#type)
             .bind(credential.created_at)
             .bind(credential.updated_at)
             .execute(&mut *connection)

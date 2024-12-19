@@ -16,7 +16,7 @@ mod tests {
         )
         .unwrap();
 
-        let result = user_service.create_user(user.clone()).await;
+        let result = user_service.create_user(&user).await;
         assert_eq!(result.unwrap(), 1);
 
         let fetched_user = user_service.get_user_by_uuid(user.id).await.unwrap();
@@ -42,7 +42,7 @@ mod tests {
         )
         .unwrap();
 
-        let result = user_service.create_user(user.clone()).await;
+        let result = user_service.create_user(&user).await;
         assert!(result.is_ok());
 
         let fetched_user = user_service.get_user_by_uuid(user.id).await.unwrap();
@@ -68,7 +68,7 @@ mod tests {
         )
         .unwrap();
 
-        let result = user_service.create_user(user.clone()).await;
+        let result = user_service.create_user(&user).await;
         assert!(result.is_ok());
 
         let fetched_user = user_service.get_user_by_username("testuser").await.unwrap();
@@ -93,7 +93,7 @@ mod tests {
         )
         .unwrap();
 
-        let result = user_service.create_user(user.clone()).await;
+        let result = user_service.create_user(&user).await;
         assert!(result.is_ok());
 
         let activation_result = user_service.activate_user(user.id).await;

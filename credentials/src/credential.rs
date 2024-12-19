@@ -14,14 +14,14 @@ pub struct Credential {
 impl Credential {
     pub fn new(
         user_id: Uuid,
-        private_key: String,
-        public_key: String,
+        private_key: &str,
+        public_key: &str,
     ) -> Self {
         Self {
             id: Uuid::new_v4(),
             user_id,
-            private_key,
-            public_key,
+            private_key:private_key.to_string(),
+            public_key:public_key.to_string(),
             r#type: String::from("CHAT_KEY"),
             created_at: Some(chrono::Local::now().naive_local()),
             updated_at: Some(chrono::Local::now().naive_local()),
@@ -36,10 +36,10 @@ mod tests {
     #[test]
     fn test_credential_new() {
         let user_id = Uuid::new_v4();
-        let private_key = "private_key_example".to_string();
-        let public_key = "public_key_example".to_string();
+        let private_key = "private_key_example";
+        let public_key = "public_key_example";
 
-        let credential = Credential::new(user_id, private_key.clone(), public_key.clone());
+        let credential = Credential::new(user_id, private_key, public_key);
 
         assert_eq!(credential.user_id, user_id);
         assert_eq!(credential.private_key, private_key);

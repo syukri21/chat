@@ -7,14 +7,14 @@ use uuid::Uuid;
 use crate::user::User;
 
 pub struct UserService {
-    db: Arc<dyn DatabaseInterface>,
+    db: Arc<dyn DatabaseInterface + Send + Sync>,
 }
 
 impl UserService {
-    pub fn new(db: Arc<dyn DatabaseInterface>) -> Self {
+    pub fn new(db: Arc<dyn DatabaseInterface + Send + Sync>) -> Self {
         Self { db }
     }
-    pub async fn create_user(&self, user: User) -> anyhow::Result<i64> {
+    pub async fn create_user(&self, user: &User) -> anyhow::Result<i64> {
         let mut connection = self.db.get_pool().acquire().await?;
 
         let query = r#"INSERT INTO users (
@@ -23,9 +23,9 @@ impl UserService {
 
         let id = sqlx::query(query)
             .bind(user.id.to_string())
-            .bind(user.username)
-            .bind(user.email)
-            .bind(user.password) // Missing binding for password field
+            .bind(&user.username)
+            .bind(&user.email)
+            .bind(&user.password) // Missing binding for password field
             .bind(user.is_active) // Missing binding for is_active field
             .bind(user.created_at.map(|dt| dt)) // Set created_at, using provided or default value
             .bind(user.updated_at.map(|dt| dt))
