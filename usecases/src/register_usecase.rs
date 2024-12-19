@@ -102,7 +102,25 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_register_validate() {
+    async fn test_register_validate_should_fail_with_invalid_input_email() {
+        let request = RegisterRequest {
+            username: "test",
+            email: "test@examplecom",
+            password: "password1",
+            private_key: "privatekey",
+            public_key: "publickey",
+        };
+
+        let result = request.validate().await.unwrap_err();
+        match result.downcast::<GenericError>().unwrap() {
+            GenericError::InvalidInput(message, 400) => {
+                assert!(message.to_string().to_lowercase().contains("email"));
+            }
+            _ => assert!(false),
+        }
+    }
+    #[tokio::test]
+    async fn test_register_validate_should_fail_with_invalid_input_password() {
         let request = RegisterRequest {
             username: "test",
             email: "test@example.com",
@@ -112,13 +130,11 @@ mod tests {
         };
 
         let result = request.validate().await.unwrap_err();
-        match result.downcast::<GenericError>() {
-            Ok(generic_error) => {
-                assert!(generic_error.to_string().contains("invalid input:"));
+        match result.downcast::<GenericError>().unwrap() {
+            GenericError::InvalidInput(message, 400) => {
+                assert!(message.to_string().to_lowercase().contains("password"));
             }
-            Err(e) => {
-                panic!("Error: {}", e);
-            }
+            _ => assert!(false),
         }
     }
 }
