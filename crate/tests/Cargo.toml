@@ -1,0 +1,16 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+persistence = { path = "../libs/persistence" }
+users = { path = "../libs/users" }
+credentials = { path = "../libs/credentials" }
+usecases = { path = "../libs/usecases" }
+commons = { path = "../libs/commons" }

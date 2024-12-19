@@ -11,7 +11,7 @@ pub(crate) async fn setup_db() -> Arc<dyn DatabaseInterface + Send + Sync> {
 
     // Apply migrations
     let pool = db.get_pool();
-    sqlx::migrate!("../migrations")
+    sqlx::migrate!("../../migrations")
         .run(&*pool)
         .await
         .expect("Failed to run database migrations");

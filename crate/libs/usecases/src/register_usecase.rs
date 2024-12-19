@@ -99,7 +99,7 @@ impl RegisterUseCaseInterface for RegisterUseCase {
         Ok(RegisterResponse {})
     }
 
-    async fn activate_user(&self, encrypted_user_id: &str) -> anyhow::Result<()> {
+    async fn activate_user<'a>(&self, _encrypted_user_id: &'a str) -> anyhow::Result<()> {
         // TODO: add encryption crate
         todo!()
     }
@@ -119,14 +119,9 @@ mod tests {
             public_key: "publickey",
         };
 
-        let result = request.validate().await.unwrap_err();
-        match result.downcast::<GenericError>().unwrap() {
-            GenericError::InvalidInput(message, 400) => {
-                assert!(message.to_string().to_lowercase().contains("email"));
-            }
-            _ => assert!(false),
-        }
+        assert_invalid_input_error(request.validate().await, "email").await;
     }
+
     #[tokio::test]
     async fn test_register_validate_should_fail_with_invalid_input_password() {
         let request = RegisterRequest {
@@ -137,10 +132,56 @@ mod tests {
             public_key: "",
         };
 
-        let result = request.validate().await.unwrap_err();
-        match result.downcast::<GenericError>().unwrap() {
+        assert_invalid_input_error(request.validate().await, "password").await;
+    }
+
+    #[tokio::test]
+    async fn test_register_validate_should_fail_with_invalid_input_username() {
+        let request = RegisterRequest {
+            username: "te",
+            email: "test@example.com",
+            password: "password1",
+            private_key: "privatekey",
+            public_key: "publickey",
+        };
+
+        assert_invalid_input_error(request.validate().await, "username").await;
+    }
+
+    #[tokio::test]
+    async fn test_register_validate_should_fail_with_empty_public_key() {
+        let request = RegisterRequest {
+            username: "testuser",
+            email: "test@example.com",
+            password: "password1",
+            private_key: "privatekey",
+            public_key: "",
+        };
+
+        assert_invalid_input_error(request.validate().await, "public key").await;
+    }
+
+    #[tokio::test]
+    async fn test_register_validate_should_fail_with_empty_private_key() {
+        let request = RegisterRequest {
+            username: "testuser",
+            email: "test@example.com",
+            password: "password1",
+            private_key: "",
+            public_key: "publickey",
+        };
+
+        assert_invalid_input_error(request.validate().await, "private key").await;
+    }
+
+    async fn assert_invalid_input_error(result: anyhow::Result<()>, expected_message: &str) {
+        let error = result.unwrap_err();
+        match error.downcast::<GenericError>().unwrap() {
             GenericError::InvalidInput(message, 400) => {
-                assert!(message.to_string().to_lowercase().contains("password"));
+                assert!(message
+                    .to_string()
+                    .to_lowercase()
+                    .contains(expected_message));
             }
             _ => assert!(false),
         }
