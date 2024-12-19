@@ -4,6 +4,12 @@ pub struct Env {
     pub db_url: String,
 }
 
+impl Default for Env {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Env {
     pub fn new() -> Self {
         let environment_variable = Self {

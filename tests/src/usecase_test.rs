@@ -3,7 +3,7 @@ mod tests {
     use crate::utils::setup;
     use credentials::credential_services::CredentialService;
     use std::sync::Arc;
-    use usecases::{RegisterRequest, RegisterResponse, RegisterUseCase, RegisterUseCaseInterface};
+    use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
     use users::user_services::UserService;
 
     #[tokio::test]
@@ -17,12 +17,12 @@ mod tests {
         let request = RegisterRequest {
             username: "test",
             email: "test@example.com",
-            password: "test",
+            password: "password1",
             private_key: "private_key",
             public_key: "public_key",
         };
 
-        let response = register_usecase.register(&request).await.unwrap();
-        assert_eq!(response, RegisterResponse {});
+        let response = register_usecase.register(&request).await;
+        assert!(response.is_ok());
     }
 }

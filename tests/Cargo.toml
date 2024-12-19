@@ -13,4 +13,4 @@ persistence = {path = "../persistence"}
 users = {path = "../users"}
 credentials = {path = "../credentials"}
 usecases = {path = "../usecases"}
-once_cell = "1.20.2"
+commons = {path = "../commons"}

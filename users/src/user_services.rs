@@ -27,8 +27,8 @@ impl UserService {
             .bind(&user.email)
             .bind(&user.password) // Missing binding for password field
             .bind(user.is_active) // Missing binding for is_active field
-            .bind(user.created_at.map(|dt| dt)) // Set created_at, using provided or default value
-            .bind(user.updated_at.map(|dt| dt))
+            .bind(user.created_at) // Set created_at, using provided or default value
+            .bind(user.updated_at)
             .bind(None::<NaiveDateTime>)
             .execute(&mut *connection)
             .await?
@@ -89,7 +89,8 @@ impl UserService {
             .bind(id.to_string())
             .fetch_one(&mut *tx)
             .await;
-        if !result.is_ok() {
+
+        if result.is_err() {
             return Err(anyhow::format_err!("Something went wrong"));
         }
 

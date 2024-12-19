@@ -1,5 +1,5 @@
 use crate::db::sqlite::create_sqlite_db_pool;
-use crate::env::env::Env;
+use crate::env::myenv::Env;
 use sqlx::{ Pool, Sqlite, SqlitePool};
 use std::sync::Arc;
 
@@ -31,7 +31,7 @@ impl DatabaseInterface for DB {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::env::env::Env;
+    use crate::env::myenv::Env;
 
     #[tokio::test]
     async fn test_db_new() {

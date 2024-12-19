@@ -14,3 +14,4 @@ async-trait.workspace = true
 persistence = {path = "../persistence"}
 users = {path = "../users"}
 credentials = {path = "../credentials"}
+commons = {path = "../commons"}
