@@ -112,7 +112,7 @@ impl RegisterUseCaseInterface for RegisterUseCase {
     }
 
     async fn activate_user<'a>(&self, _encrypted_user_id: &'a str) -> anyhow::Result<()> {
-        // TODO: add encryption crate
+        // TODO: add crypto crate
         todo!()
     }
 }

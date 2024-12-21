@@ -4,7 +4,7 @@ use persistence::Env;
 use std::sync::Arc;
 
 pub struct Mail<'a> {
-    mail_config: Box<MailConfig<'a>>,
+    mail_config: MailConfig<'a>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -33,7 +33,7 @@ impl<'a> MailConfig<'a> {
 impl<'a> Mail<'a> {
     pub fn new(env: &'a Env) -> Self {
         Self {
-            mail_config: Box::new(MailConfig::from_env(&env)),
+            mail_config: MailConfig::from_env(&env),
         }
     }
 

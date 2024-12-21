@@ -9,9 +9,8 @@ uuid.workspace = true
 chrono.workspace = true
 anyhow.workspace = true
 sqlx.workspace = true
+dotenv.workspace = true
 
-dotenv = "0.15.0"
-dotenvy = "0.15.7"
 
 persistence = { path = "../libs/persistence" }
 users = { path = "../libs/users" }

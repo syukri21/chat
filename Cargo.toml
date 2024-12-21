@@ -8,10 +8,11 @@ members = [
     "crate/libs/usecases",
     "crate/tests",
     "crate/libs/clients/mail"
-]
+, "crate/libs/clients/crypto"]
 
 
 [workspace.dependencies]
+dotenv = "0.15.0"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 tower = { version = "0.5.1" }
