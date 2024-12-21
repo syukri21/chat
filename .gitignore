@@ -1,6 +1,6 @@
 /target
 /.idea
-/.env
+/.ENV
 /app.DB
 /app.DB*
 

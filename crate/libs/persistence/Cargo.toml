@@ -8,3 +8,6 @@ sqlx.workspace = true
 anyhow.workspace = true
 async-trait.workspace = true
 tokio.workspace = true
+
+dotenv = "0.15"
+dotenvy = "0.15"

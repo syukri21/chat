@@ -40,6 +40,12 @@ mod tests {
 
         let env = Env {
             db_url: test_db_url.to_string(),
+            email_from: "".to_string(),
+            email_from_email: "".to_string(),
+            email_smtp_username: "".to_string(),
+            email_smtp_password: "".to_string(),
+            email_smtp_host: "".to_string(),
+            email_smtp_port: "".to_string(),
         };
         // Wrap it in an Arc and Box as required by the method signature
 

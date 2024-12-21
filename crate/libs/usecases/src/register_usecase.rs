@@ -2,6 +2,7 @@ use async_trait::async_trait;
 use commons::generic_errors::GenericError;
 use credentials::credential::Credential;
 use credentials::credential_services::CredentialService;
+use mail::SendEmail;
 use std::sync::Arc;
 use users::user::User;
 use users::user_services::UserService;
@@ -60,13 +61,19 @@ pub struct RegisterResponse {}
 pub struct RegisterUseCase {
     user_service: Arc<UserService>,
     credential_service: Arc<CredentialService>,
+    mail: Arc<dyn SendEmail + Send + Sync>,
 }
 
 impl RegisterUseCase {
-    pub fn new(user_service: Arc<UserService>, credential_service: Arc<CredentialService>) -> Self {
+    pub fn new(
+        user_service: Arc<UserService>,
+        credential_service: Arc<CredentialService>,
+        mail: Arc<dyn SendEmail + Send + Sync>,
+    ) -> Self {
         Self {
             user_service,
             credential_service,
+            mail,
         }
     }
 }
@@ -94,7 +101,12 @@ impl RegisterUseCaseInterface for RegisterUseCase {
             .create_credential(&credential)
             .await?;
 
-        // TODO: add email crate
+        self.mail.send_email(
+            &user.username,
+            &user.email,
+            "Registration successful",
+            "Your account has been created successfully, Please activate your account. Click the link below to activate your account, <a href=\"https://example.com/activate/123\">Activate</a>",
+        ).await?;
 
         Ok(RegisterResponse {})
     }
