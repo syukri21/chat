@@ -158,9 +158,6 @@ impl RegisterUseCaseInterface for RegisterUseCase<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mail::Mail;
-    use persistence::DB;
-    use std::ptr::null;
 
     #[tokio::test]
     async fn test_register_validate_should_fail_with_invalid_input_email() {
