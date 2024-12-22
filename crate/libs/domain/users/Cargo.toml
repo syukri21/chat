@@ -12,4 +12,4 @@ uuid.workspace = true
 chrono.workspace = true
 anyhow.workspace = true
 sqlx.workspace = true
-persistence = {path = "../persistence"}
+persistence = {path = "../../persistence"}

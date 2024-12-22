@@ -13,8 +13,8 @@ dotenv.workspace = true
 
 
 persistence = { path = "../libs/persistence" }
-users = { path = "../libs/users" }
-credentials = { path = "../libs/credentials" }
+users = { path = "../libs/domain/users" }
+credentials = { path = "../libs/domain/credentials" }
 usecases = { path = "../libs/usecases" }
 commons = { path = "../libs/commons" }
 mail = { path = "../libs/clients/mail" }

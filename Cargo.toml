@@ -2,9 +2,9 @@
 resolver = "2"
 members = [
     "crate/libs/commons",
-    "crate/libs/credentials",
+    "crate/libs/domain/credentials",
     "crate/libs/persistence",
-    "crate/libs/users",
+    "crate/libs/domain/users",
     "crate/libs/usecases",
     "crate/tests",
     "crate/libs/clients/mail",

@@ -124,7 +124,7 @@ impl RegisterUseCaseInterface for RegisterUseCase<'_> {
 
     async fn activate_user<'a>(&self, encrypted_user_id: &'a str) -> anyhow::Result<()> {
         let user_id = self.crypto.decrypt(encrypted_user_id).await?;
-        self.user_service.activate_user((&user_id).parse()?).await?;
+        self.user_service.activate_user(user_id.parse()?).await?;
         Ok(())
     }
 

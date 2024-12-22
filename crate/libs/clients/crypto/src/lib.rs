@@ -71,7 +71,7 @@ impl Encrypt for Crypto<'_> {
         let cipher = Aes256Gcm::new(key);
 
         let plaintext = cipher
-            .decrypt(&nonce, ciphertext.as_ref())
+            .decrypt(nonce, ciphertext.as_ref())
             .map_err(|e| anyhow::anyhow!("Decryption error: {:?}", e))?;
 
         Ok(String::from_utf8(plaintext)?)
@@ -88,7 +88,7 @@ impl Encrypt for Crypto<'_> {
         let cipher = Aes256Gcm::new(key);
 
         let plaintext = cipher
-            .decrypt(&nonce, ciphertext.as_ref())
+            .decrypt(nonce, ciphertext.as_ref())
             .map_err(|e| anyhow::anyhow!("Decryption error: {:?}", e))?;
 
         Ok(String::from_utf8(plaintext)?)

@@ -12,8 +12,8 @@ sqlx.workspace = true
 async-trait.workspace = true
 
 persistence = { path = "../persistence" }
-users = { path = "../users" }
-credentials = { path = "../credentials" }
+users = { path = "../domain/users" }
+credentials = { path = "../domain/credentials" }
 commons = { path = "../commons" }
 mail = { path = "../clients/mail" }
 crypto = { path = "../clients/crypto" }
