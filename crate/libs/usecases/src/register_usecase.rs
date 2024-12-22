@@ -122,9 +122,10 @@ impl RegisterUseCaseInterface for RegisterUseCase<'_> {
         Ok(RegisterResponse {})
     }
 
-    async fn activate_user<'a>(&self, _encrypted_user_id: &'a str) -> anyhow::Result<()> {
-        // TODO: add crypto crate
-        todo!()
+    async fn activate_user<'a>(&self, encrypted_user_id: &'a str) -> anyhow::Result<()> {
+        let user_id = self.crypto.decrypt(encrypted_user_id).await?;
+        self.user_service.activate_user((&user_id).parse()?).await?;
+        Ok(())
     }
 
     async fn send_activation_email<'a>(
@@ -157,6 +158,9 @@ impl RegisterUseCaseInterface for RegisterUseCase<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mail::Mail;
+    use persistence::DB;
+    use std::ptr::null;
 
     #[tokio::test]
     async fn test_register_validate_should_fail_with_invalid_input_email() {

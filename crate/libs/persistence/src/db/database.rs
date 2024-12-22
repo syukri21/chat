@@ -1,6 +1,6 @@
 use crate::db::sqlite::create_sqlite_db_pool;
 use crate::env::myenv::Env;
-use sqlx::{ Pool, Sqlite, SqlitePool};
+use sqlx::{Pool, Sqlite, SqlitePool};
 use std::sync::Arc;
 
 pub struct DB {
@@ -13,6 +13,20 @@ impl DB {
         Ok(Self {
             pool: Arc::new(pool),
         })
+    }
+
+    pub async fn arc_new(env: Env) -> Arc<DB> {
+        Arc::new(DB::new(env).await.unwrap())
+    }
+
+    pub async fn new_and_migrate(env: Env) -> Arc<DB> {
+        let db = Self::arc_new(env).await;
+        let pool = db.get_pool();
+        sqlx::migrate!("../../../migrations")
+            .run(&*pool)
+            .await
+            .expect("Failed to run database migrations");
+        db
     }
 }
 
@@ -47,6 +61,7 @@ mod tests {
             email_smtp_host: "".to_string(),
             email_smtp_port: "".to_string(),
             app_key_main: "".to_string(),
+            app_callback_url: "".to_string(),
         };
         // Wrap it in an Arc and Box as required by the method signature
 

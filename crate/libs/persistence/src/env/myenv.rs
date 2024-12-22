@@ -1,5 +1,4 @@
 use std::env;
-use std::sync::Arc;
 
 pub struct Env {
     pub db_url: String,
@@ -36,9 +35,11 @@ impl Env {
         environment_variable
     }
 
-    pub fn new_arc() -> Arc<Env> {
-        Arc::new(Env::new())
+    pub fn load() -> Env {
+        dotenv::dotenv().ok();
+        Self::new()
     }
+
     fn validate(&self) {
         if self.db_url.is_empty() {
             panic!("Database URL is empty");
@@ -99,6 +100,7 @@ mod tests {
             email_smtp_host: "".to_string(),
             email_smtp_port: "".to_string(),
             app_key_main: "".to_string(),
+            app_callback_url: "".to_string(),
         };
         env.validate();
     }
