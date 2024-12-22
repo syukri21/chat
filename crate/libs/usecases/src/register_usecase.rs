@@ -137,7 +137,7 @@ impl RegisterUseCaseInterface for RegisterUseCase<'_> {
 
         let button = format!(
             r#"<a href="{}/activate/{}">Activate account</a>"#,
-            self.env.email_from, encrypted_user_id
+            self.env.app_callback_url, encrypted_user_id
         );
         let message = format!(
             r#"

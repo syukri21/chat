@@ -10,6 +10,7 @@ pub struct Env {
     pub email_smtp_host: String,
     pub email_smtp_port: String,
     pub app_key_main: String,
+    pub app_callback_url: String,
 }
 
 impl Default for Env {
@@ -29,6 +30,7 @@ impl Env {
             email_smtp_host: env::var("EMAIL_SMTP_HOST").unwrap_or_else(|_| "".to_string()),
             email_smtp_port: env::var("EMAIL_SMTP_PORT").unwrap_or_else(|_| "".to_string()),
             app_key_main: env::var("APP_KEY_MAIN").unwrap_or_else(|_| "".to_string()),
+            app_callback_url: env::var("APP_CALLBACK_URL").unwrap_or_else(|_| "".to_string()),
         };
         environment_variable.validate();
         environment_variable
