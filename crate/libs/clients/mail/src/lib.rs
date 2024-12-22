@@ -33,7 +33,14 @@ impl<'a> MailConfig<'a> {
 impl<'a> Mail<'a> {
     pub fn new(env: &'a Env) -> Self {
         Self {
-            mail_config: MailConfig::from_env(&env),
+            mail_config: MailConfig {
+                from: &env.email_from,
+                from_email: &env.email_from_email,
+                smtp_username: &env.email_smtp_username,
+                smtp_password: &env.email_smtp_password,
+                smtp_host: &env.email_smtp_host,
+                smtp_port: &env.email_smtp_port,
+            },
         }
     }
 

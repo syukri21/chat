@@ -18,3 +18,4 @@ credentials = { path = "../libs/credentials" }
 usecases = { path = "../libs/usecases" }
 commons = { path = "../libs/commons" }
 mail = { path = "../libs/clients/mail" }
+crypto = { path = "../libs/clients/crypto" }

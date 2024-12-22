@@ -33,16 +33,17 @@ impl<'a> Crypto<'a> {
         }
     }
 
-    pub fn new_arc(env: &'a Env) -> Arc<Crypto<'a>> {
+    pub fn new_arc(env: &'a Env) -> Arc<dyn Encrypt + Send + Sync + 'a> {
         Arc::new(Crypto::new(env))
     }
 }
 
 #[async_trait::async_trait]
 #[allow(dead_code)]
-trait Encrypt {
+pub trait Encrypt {
     async fn encrypt(&self, data: &str) -> anyhow::Result<String>;
     async fn decrypt(&self, data: &str) -> anyhow::Result<String>;
+    async fn decrypt_oy(&self, data: &str) -> anyhow::Result<String>;
 }
 
 #[async_trait::async_trait]
@@ -56,20 +57,33 @@ impl Encrypt for Crypto<'_> {
             .encrypt(&nonce, data.as_bytes())
             .map_err(|e| anyhow::anyhow!("Encryption error: {:?}", e))?;
 
-        let nonce = general_purpose::STANDARD.encode(nonce);
-        let ciphertext = general_purpose::STANDARD.encode(ciphertext);
-        Ok(format!("{}:{}", nonce, ciphertext))
+        let nonce = general_purpose::URL_SAFE_NO_PAD.encode(nonce);
+        let ciphertext = general_purpose::URL_SAFE_NO_PAD.encode(ciphertext);
+        Ok(format!("{}{}", nonce, ciphertext))
     }
 
     async fn decrypt(&self, data: &str) -> anyhow::Result<String> {
+        let (nonce_str, ciphertext_str) = data.split_at(16); // 12 bytes encoded in base64 is 16 characters
+        let nonce = general_purpose::URL_SAFE_NO_PAD.decode(nonce_str)?;
+        let nonce = Nonce::<Aes256Gcm>::from_slice(&nonce);
+        let ciphertext = general_purpose::URL_SAFE_NO_PAD.decode(ciphertext_str)?;
+        let key = Key::<Aes256Gcm>::from_slice(self.config.app_key_main.as_bytes());
+        let cipher = Aes256Gcm::new(key);
+
+        let plaintext = cipher
+            .decrypt(&nonce, ciphertext.as_ref())
+            .map_err(|e| anyhow::anyhow!("Decryption error: {:?}", e))?;
+
+        Ok(String::from_utf8(plaintext)?)
+    }
+    async fn decrypt_oy(&self, data: &str) -> anyhow::Result<String> {
         let parts: Vec<&str> = data.split(':').collect();
         if parts.len() != 2 {
             return Err(anyhow::anyhow!("Invalid encrypted data format"));
         }
-
-        let nonce = general_purpose::STANDARD.decode(parts[0])?;
+        let nonce = general_purpose::URL_SAFE_NO_PAD.decode(parts[0])?;
         let nonce = Nonce::<Aes256Gcm>::from_slice(&nonce);
-        let ciphertext = general_purpose::STANDARD.decode(parts[1])?;
+        let ciphertext = general_purpose::URL_SAFE_NO_PAD.decode(parts[1])?;
         let key = Key::<Aes256Gcm>::from_slice(self.config.app_key_main.as_bytes());
         let cipher = Aes256Gcm::new(key);
 
@@ -106,6 +120,8 @@ mod tests {
                 panic!("Error: {}", e);
             }
         };
+        println!("decrypted: {}", decrypted);
+        println!("encrypted: {}", encrypted);
         assert_eq!(data, decrypted);
     }
 }

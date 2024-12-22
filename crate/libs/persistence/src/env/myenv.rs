@@ -1,4 +1,5 @@
 use std::env;
+use std::sync::Arc;
 
 pub struct Env {
     pub db_url: String,
@@ -33,6 +34,9 @@ impl Env {
         environment_variable
     }
 
+    pub fn new_arc() -> Arc<Env> {
+        Arc::new(Env::new())
+    }
     fn validate(&self) {
         if self.db_url.is_empty() {
             panic!("Database URL is empty");

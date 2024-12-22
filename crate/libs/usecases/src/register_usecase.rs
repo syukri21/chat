@@ -60,20 +60,20 @@ impl RegisterRequest<'_> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RegisterResponse {}
 
-pub struct RegisterUseCase {
+pub struct RegisterUseCase<'a> {
     user_service: Arc<UserService>,
     credential_service: Arc<CredentialService>,
     mail: Arc<dyn SendEmail + Send + Sync>,
-    env: Arc<Env>,
-    encrypt: Arc<dyn Encrypt + Send + Sync>,
+    env: &'a Env,
+    crypto: Arc<dyn Encrypt + Send + Sync>,
 }
 
-impl RegisterUseCase {
+impl<'a> RegisterUseCase<'a> {
     pub fn new(
         user_service: Arc<UserService>,
         credential_service: Arc<CredentialService>,
         mail: Arc<dyn SendEmail + Send + Sync>,
-        env: Arc<Env>,
+        env: &'a Env,
         encrypt: Arc<dyn Encrypt + Send + Sync>,
     ) -> Self {
         Self {
@@ -81,7 +81,7 @@ impl RegisterUseCase {
             credential_service,
             mail,
             env,
-            encrypt,
+            crypto: encrypt,
         }
     }
 }
@@ -101,7 +101,7 @@ pub trait RegisterUseCaseInterface {
 }
 
 #[async_trait]
-impl RegisterUseCaseInterface for RegisterUseCase {
+impl RegisterUseCaseInterface for RegisterUseCase<'_> {
     async fn register<'a>(
         &self,
         request: &RegisterRequest<'a>,
@@ -114,6 +114,9 @@ impl RegisterUseCaseInterface for RegisterUseCase {
         let credential = Credential::new(user.id, request.private_key, request.public_key);
         self.credential_service
             .create_credential(&credential)
+            .await?;
+
+        self.send_activation_email(&user.id.to_string(), &user.username, &user.email)
             .await?;
 
         Ok(RegisterResponse {})
@@ -130,7 +133,8 @@ impl RegisterUseCaseInterface for RegisterUseCase {
         username: &'a str,
         email: &'a str,
     ) -> anyhow::Result<()> {
-        let encrypted_user_id = user_id;
+        let encrypted_user_id = self.crypto.encrypt(user_id).await?;
+
         let button = format!(
             r#"<a href="{}/activate/{}">Activate account</a>"#,
             self.env.email_from, encrypted_user_id
