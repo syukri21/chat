@@ -2,7 +2,10 @@ use crate::db::sqlite::create_sqlite_db_pool;
 use crate::env::myenv::Env;
 use sqlx::{Pool, Sqlite, SqlitePool};
 use std::sync::Arc;
+use nject::injectable;
 
+
+#[injectable]
 pub struct DB {
     pool: Arc<Pool<Sqlite>>,
 }

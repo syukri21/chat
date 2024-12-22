@@ -10,6 +10,7 @@ chrono.workspace = true
 anyhow.workspace = true
 sqlx.workspace = true
 async-trait.workspace = true
+nject.workspace = true
 
 persistence = { path = "../persistence" }
 users = { path = "../domain/users" }
