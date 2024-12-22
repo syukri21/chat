@@ -8,6 +8,7 @@ pub struct Env {
     pub email_smtp_password: String,
     pub email_smtp_host: String,
     pub email_smtp_port: String,
+    pub app_key_main: String,
 }
 
 impl Default for Env {
@@ -26,6 +27,7 @@ impl Env {
             email_smtp_password: env::var("EMAIL_SMTP_PASSWORD").unwrap_or_else(|_| "".to_string()),
             email_smtp_host: env::var("EMAIL_SMTP_HOST").unwrap_or_else(|_| "".to_string()),
             email_smtp_port: env::var("EMAIL_SMTP_PORT").unwrap_or_else(|_| "".to_string()),
+            app_key_main: env::var("APP_KEY_MAIN").unwrap_or_else(|_| "".to_string()),
         };
         environment_variable.validate();
         environment_variable
@@ -55,6 +57,11 @@ impl Env {
         if self.email_smtp_port.is_empty() {
             panic!("Email smtp port is empty");
         }
+
+        // validate crypto
+        if self.app_key_main.is_empty() {
+            panic!("App main key is empty");
+        }
     }
 }
 
@@ -63,7 +70,6 @@ mod tests {
     use super::*;
     #[test]
     fn test_env_new() {
-
         dotenv::dotenv().ok();
         let env = Env::new();
         assert!(!env.db_url.is_empty());
@@ -73,6 +79,7 @@ mod tests {
         assert!(!env.email_smtp_password.is_empty());
         assert!(!env.email_smtp_host.is_empty());
         assert!(!env.email_smtp_port.is_empty());
+        assert!(!env.app_key_main.is_empty());
     }
     #[test]
     #[should_panic]
@@ -85,6 +92,7 @@ mod tests {
             email_smtp_password: "".to_string(),
             email_smtp_host: "".to_string(),
             email_smtp_port: "".to_string(),
+            app_key_main: "".to_string(),
         };
         env.validate();
     }

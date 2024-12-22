@@ -46,6 +46,7 @@ mod tests {
             email_smtp_password: "".to_string(),
             email_smtp_host: "".to_string(),
             email_smtp_port: "".to_string(),
+            app_key_main: "".to_string(),
         };
         // Wrap it in an Arc and Box as required by the method signature
 

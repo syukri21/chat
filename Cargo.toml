@@ -7,8 +7,9 @@ members = [
     "crate/libs/users",
     "crate/libs/usecases",
     "crate/tests",
-    "crate/libs/clients/mail"
-, "crate/libs/clients/crypto"]
+    "crate/libs/clients/mail",
+    "crate/libs/clients/crypto"
+]
 
 
 [workspace.dependencies]

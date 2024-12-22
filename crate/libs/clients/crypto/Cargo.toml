@@ -4,3 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+aes-gcm = { version = "0.10.3" }
+base64 = { version = "0.22.1" }
+tokio.workspace = true
+async-trait.workspace = true
+dotenv.workspace = true
+
+anyhow.workspace = true
+persistence = { path = "../../persistence" }
