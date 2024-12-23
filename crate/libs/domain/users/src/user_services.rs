@@ -4,11 +4,8 @@ use persistence::DatabaseInterface;
 use sqlx::sqlite::SqliteRow;
 use sqlx::{Acquire, Row};
 use std::sync::Arc;
-use nject::{injectable, provider};
 use uuid::Uuid;
 
-#[injectable]
-#[provider]
 pub struct UserService {
     db: Arc<dyn DatabaseInterface + Send + Sync>,
 }

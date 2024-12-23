@@ -1,9 +1,6 @@
-use nject::{injectable, provider};
 use std::sync::Arc;
 use users::user_services::UserService;
 
-#[injectable]
-#[provider]
 pub struct LoginUseCase {
     user_service: Arc<UserService>,
 }

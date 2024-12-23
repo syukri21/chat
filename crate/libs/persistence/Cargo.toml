@@ -9,4 +9,3 @@ anyhow.workspace = true
 async-trait.workspace = true
 tokio.workspace = true
 dotenv.workspace = true
-nject.workspace = true
