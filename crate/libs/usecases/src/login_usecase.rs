@@ -1,8 +1,13 @@
+use persistence::DB;
+use shaku::{module, Component, Interface};
 use std::sync::Arc;
-use users::user_services::UserService;
+use users::user_services::{UserService, UserServiceInterface};
 
+#[derive(Component)]
+#[shaku(interface = LoginUseCaseInterface)]
 pub struct LoginUseCase {
-    user_service: Arc<UserService>,
+    #[shaku(inject)]
+    user_service: Arc<dyn UserServiceInterface>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -19,7 +24,7 @@ pub struct LoginResponse<'a> {
 }
 
 #[async_trait::async_trait]
-pub trait LoginUseCaseInterface {
+pub trait LoginUseCaseInterface: Interface {
     async fn login(&self, request: LoginRequest<'_>) -> anyhow::Result<LoginResponse>;
 }
 
@@ -32,5 +37,12 @@ impl LoginUseCaseInterface for LoginUseCase {
             private_key: "private_key",
             public_key: "public_key",
         })
+    }
+}
+
+module! {
+    MyModule {
+        components = [LoginUseCase, UserService, DB],
+        providers = []
     }
 }

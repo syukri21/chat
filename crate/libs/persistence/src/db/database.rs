@@ -1,8 +1,11 @@
 use crate::db::sqlite::create_sqlite_db_pool;
 use crate::env::myenv::Env;
+use shaku::{Component, Interface};
 use sqlx::{Pool, Sqlite, SqlitePool};
 use std::sync::Arc;
 
+#[derive(Component)]
+#[shaku(interface = DatabaseInterface)]
 pub struct DB {
     pool: Arc<Pool<Sqlite>>,
 }
@@ -32,7 +35,7 @@ impl DB {
 
 // Update the `DatabaseInterface` to explicitly return `SqlitePool`
 #[async_trait::async_trait]
-pub trait DatabaseInterface {
+pub trait DatabaseInterface: Interface +  Send + Sync {
     fn get_pool(&self) -> Arc<SqlitePool>;
 }
 
