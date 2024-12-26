@@ -10,7 +10,8 @@ use uuid::Uuid;
 #[derive(Component)]
 #[shaku(interface = UserServiceInterface)]
 pub struct UserService {
-    db: Arc<dyn DatabaseInterface + Send + Sync>,
+    #[shaku(inject)]
+    db: Arc<dyn DatabaseInterface>,
 }
 
 #[async_trait::async_trait]

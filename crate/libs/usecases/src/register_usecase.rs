@@ -30,27 +30,27 @@ impl RegisterRequest<'_> {
         // check if email is valid
         let email_err = "Email is not valid";
         if !self.email.contains('@') || !self.email.contains('.') {
-            return Err(GenericError::invalid_input(email_err).into());
+            return Err(GenericError::invalid_input(String::from(email_err)));
         }
 
         let password_err = "Password must be at least 8 characters and contain at least one number";
         if self.password.len() < 8 || !self.password.chars().any(char::is_numeric) {
-            return Err(GenericError::invalid_input(password_err).into());
+            return Err(GenericError::invalid_input(String::from(password_err)));
         }
 
         let username_err = "Username must be at least 3 characters";
         if self.username.len() < 3 {
-            return Err(GenericError::invalid_input(username_err).into());
+            return Err(GenericError::invalid_input(String::from(username_err)));
         }
 
         let public_key_err = "Public key is empty";
         if self.public_key.is_empty() {
-            return Err(GenericError::invalid_input(public_key_err).into());
+            return Err(GenericError::invalid_input(String::from(public_key_err)));
         }
 
         let private_key_err = "Private key is empty";
         if self.private_key.is_empty() {
-            return Err(GenericError::invalid_input(private_key_err).into());
+            return Err(GenericError::invalid_input(String::from(private_key_err)));
         }
 
         Ok(())

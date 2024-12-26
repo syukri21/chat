@@ -292,6 +292,7 @@ dependencies = [
 name = "commons"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "derive_more",
  "serde",
  "thiserror 2.0.8",

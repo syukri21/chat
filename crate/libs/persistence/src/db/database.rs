@@ -24,18 +24,22 @@ impl DB {
 
     pub async fn new_and_migrate(env: Env) -> Arc<DB> {
         let db = Self::arc_new(env).await;
-        let pool = db.get_pool();
+        Self::migrate(&db).await;
+        db
+    }
+
+    pub async fn migrate(&self) {
+        let pool = self.get_pool();
         sqlx::migrate!("../../../migrations")
             .run(&*pool)
             .await
             .expect("Failed to run database migrations");
-        db
     }
 }
 
 // Update the `DatabaseInterface` to explicitly return `SqlitePool`
 #[async_trait::async_trait]
-pub trait DatabaseInterface: Interface +  Send + Sync {
+pub trait DatabaseInterface: Interface + Send + Sync {
     fn get_pool(&self) -> Arc<SqlitePool>;
 }
 
