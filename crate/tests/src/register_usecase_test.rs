@@ -8,7 +8,7 @@ mod tests {
     use std::sync::Arc;
     use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
     use users::user::User;
-    use users::user_services::UserService;
+    use users::user_services::{UserService, UserServiceInterface};
 
     #[tokio::test]
     async fn test_register_usecase() {

@@ -5,7 +5,7 @@ mod tests {
     use credentials::credential_services::CredentialService;
     use std::sync::Arc;
     use users::user::User;
-    use users::user_services::UserService;
+    use users::user_services::{UserService, UserServiceInterface};
 
     #[tokio::test]
     async fn test_create_credential_and_get_credential_by_user_id() {

@@ -1,20 +1,49 @@
 use crate::user::User;
 use chrono::NaiveDateTime;
 use persistence::DatabaseInterface;
+use shaku::{Component, Interface};
 use sqlx::sqlite::SqliteRow;
 use sqlx::{Acquire, Row};
 use std::sync::Arc;
 use uuid::Uuid;
 
+#[derive(Component)]
+#[shaku(interface = UserServiceInterface)]
 pub struct UserService {
     db: Arc<dyn DatabaseInterface + Send + Sync>,
+}
+
+#[async_trait::async_trait]
+pub trait UserServiceInterface: Interface + Send + Sync {
+    async fn create_user(&self, user: &User) -> anyhow::Result<i64>;
+    async fn get_user_by_uuid(&self, id: Uuid) -> anyhow::Result<User>;
+    async fn get_user_by_username(&self, username: &str) -> anyhow::Result<User>;
+    async fn activate_user(&self, id: Uuid) -> anyhow::Result<()>;
 }
 
 impl UserService {
     pub fn new(db: Arc<dyn DatabaseInterface + Send + Sync>) -> Self {
         Self { db }
     }
-    pub async fn create_user(&self, user: &User) -> anyhow::Result<i64> {
+    fn row_to_user(row: SqliteRow) -> anyhow::Result<User> {
+        let user = User {
+            id: row.try_get::<String, _>("id")?.parse()?,
+            username: row.try_get("username")?,
+            email: row.try_get("email")?,
+            password: row.try_get("password")?,
+            is_active: row.try_get("is_active")?,
+            created_at: row.try_get("created_at")?,
+            updated_at: row.try_get("updated_at")?,
+            deleted_at: row.try_get("deleted_at").ok(),
+        };
+
+        Ok(user)
+    }
+}
+
+#[async_trait::async_trait]
+impl UserServiceInterface for UserService {
+    async fn create_user(&self, user: &User) -> anyhow::Result<i64> {
         let mut connection = self.db.get_pool().acquire().await?;
 
         let query = r#"INSERT INTO users (
@@ -36,7 +65,7 @@ impl UserService {
 
         Ok(id)
     }
-    pub async fn get_user_by_uuid(&self, id: Uuid) -> anyhow::Result<User> {
+    async fn get_user_by_uuid(&self, id: Uuid) -> anyhow::Result<User> {
         let mut connection = self.db.get_pool().acquire().await?;
 
         let query = r#"SELECT
@@ -58,7 +87,7 @@ impl UserService {
 
         Self::row_to_user(row)
     }
-    pub async fn get_user_by_username(&self, username: &str) -> anyhow::Result<User> {
+    async fn get_user_by_username(&self, username: &str) -> anyhow::Result<User> {
         let mut connection = self.db.get_pool().acquire().await?;
         let query = r#"SELECT
             id,
@@ -78,8 +107,7 @@ impl UserService {
 
         Self::row_to_user(row)
     }
-
-    pub async fn activate_user(&self, id: Uuid) -> anyhow::Result<()> {
+    async fn activate_user(&self, id: Uuid) -> anyhow::Result<()> {
         let mut connection = self.db.get_pool().acquire().await?;
         let mut tx = connection.begin().await?;
 
@@ -118,20 +146,5 @@ impl UserService {
 
         tx.commit().await?;
         Ok(())
-    }
-
-    fn row_to_user(row: SqliteRow) -> anyhow::Result<User> {
-        let user = User {
-            id: row.try_get::<String, _>("id")?.parse()?,
-            username: row.try_get("username")?,
-            email: row.try_get("email")?,
-            password: row.try_get("password")?,
-            is_active: row.try_get("is_active")?,
-            created_at: row.try_get("created_at")?,
-            updated_at: row.try_get("updated_at")?,
-            deleted_at: row.try_get("deleted_at").ok(),
-        };
-
-        Ok(user)
     }
 }

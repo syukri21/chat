@@ -7,7 +7,7 @@ use mail::SendEmail;
 use persistence::Env;
 use std::sync::Arc;
 use users::user::User;
-use users::user_services::UserService;
+use users::user_services::{UserService, UserServiceInterface};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RegisterRequest<'a> {

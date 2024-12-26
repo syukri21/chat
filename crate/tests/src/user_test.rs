@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use users::user::User;
-    use users::user_services::UserService;
     use crate::utils::setup_db;
+    use users::user::User;
+    use users::user_services::{UserService, UserServiceInterface};
 
     #[tokio::test]
     async fn test_create_user() {
@@ -119,5 +119,4 @@ mod tests {
         assert!(error_message.contains("not found"));
         assert!(error_message.contains(nonexistent_id.to_string().as_str()));
     }
-
 }
