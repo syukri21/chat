@@ -35,7 +35,7 @@ impl LoginUseCaseInterface for LoginUseCase {
         let result = self.user_service.get_user_by_username("sd").await;
         if result.is_err() {
             return match result.unwrap_err().downcast_ref::<Error>() {
-                Some(Error::RowNotFound) => Err(GenericError::login_failed().into()),
+                Some(Error::RowNotFound) => Err(GenericError::login_failed()),
                 _ => Err(GenericError::unknown()),
             };
         }
