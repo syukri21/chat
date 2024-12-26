@@ -115,6 +115,7 @@ mod tests {
             email_smtp_port: "587".to_string(),
             app_key_main: "testkey".to_string(),
             app_callback_url: "".to_string(),
+            app_key_jwt: "".to_string(),
         };
         let mail = Mail::new(&env);
         let result = mail

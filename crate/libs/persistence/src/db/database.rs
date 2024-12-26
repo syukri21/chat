@@ -69,6 +69,7 @@ mod tests {
             email_smtp_port: "".to_string(),
             app_key_main: "".to_string(),
             app_callback_url: "".to_string(),
+            app_key_jwt: "".to_string(),
         };
         // Wrap it in an Arc and Box as required by the method signature
 

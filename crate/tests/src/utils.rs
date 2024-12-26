@@ -14,6 +14,7 @@ pub(crate) async fn setup_db() -> Arc<dyn DatabaseInterface + Send + Sync> {
         email_smtp_port: "".to_string(),
         app_key_main: "".to_string(),
         app_callback_url: "".to_string(),
+        app_key_jwt: "".to_string(),
     };
     let db = Arc::new(DB::new(env).await.unwrap());
 

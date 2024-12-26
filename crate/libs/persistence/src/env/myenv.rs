@@ -1,5 +1,8 @@
+use shaku::{Component, Interface};
 use std::env;
 
+#[derive(Debug, Clone, Component)]
+#[shaku(interface = EnvInterface)]
 pub struct Env {
     pub db_url: String,
     pub email_from: String,
@@ -10,11 +13,58 @@ pub struct Env {
     pub email_smtp_port: String,
     pub app_key_main: String,
     pub app_callback_url: String,
+    pub app_key_jwt: String,
+}
+
+pub trait EnvInterface: Interface {
+    fn get_db_url(&self) -> &str;
+    fn get_email_from(&self) -> &str;
+    fn get_email_from_email(&self) -> &str;
+    fn get_email_smtp_username(&self) -> &str;
+    fn get_email_smtp_password(&self) -> &str;
+    fn get_email_smtp_host(&self) -> &str;
+    fn get_email_smtp_port(&self) -> &str;
+    fn get_app_key_main(&self) -> &str;
+    fn get_app_callback_url(&self) -> &str;
+    fn get_app_key_jwt(&self) -> &str;
+}
+
+impl EnvInterface for Env {
+    fn get_db_url(&self) -> &str {
+        &self.db_url
+    }
+    fn get_email_from(&self) -> &str {
+        &self.email_from
+    }
+    fn get_email_from_email(&self) -> &str {
+        &self.email_from_email
+    }
+    fn get_email_smtp_username(&self) -> &str {
+        &self.email_smtp_username
+    }
+    fn get_email_smtp_password(&self) -> &str {
+        &self.email_smtp_password
+    }
+    fn get_email_smtp_host(&self) -> &str {
+        &self.email_smtp_host
+    }
+    fn get_email_smtp_port(&self) -> &str {
+        &self.email_smtp_port
+    }
+    fn get_app_key_main(&self) -> &str {
+        &self.app_key_main
+    }
+    fn get_app_callback_url(&self) -> &str {
+        &self.app_callback_url
+    }
+    fn get_app_key_jwt(&self) -> &str {
+        &self.app_key_jwt
+    }
 }
 
 impl Default for Env {
     fn default() -> Self {
-        Self::new()
+        Self::load()
     }
 }
 
@@ -30,6 +80,7 @@ impl Env {
             email_smtp_port: env::var("EMAIL_SMTP_PORT").unwrap_or_else(|_| "".to_string()),
             app_key_main: env::var("APP_KEY_MAIN").unwrap_or_else(|_| "".to_string()),
             app_callback_url: env::var("APP_CALLBACK_URL").unwrap_or_else(|_| "".to_string()),
+            app_key_jwt: env::var("APP_KEY_JWT").unwrap_or_else(|_| "".to_string()),
         };
         environment_variable.validate();
         environment_variable
@@ -69,6 +120,11 @@ impl Env {
         if self.app_key_main.is_empty() {
             panic!("App main key is empty");
         }
+
+        // validate jwt key
+        if self.app_key_jwt.is_empty() {
+            panic!("App jwt key is empty");
+        }
     }
 }
 
@@ -101,6 +157,7 @@ mod tests {
             email_smtp_port: "".to_string(),
             app_key_main: "".to_string(),
             app_callback_url: "".to_string(),
+            app_key_jwt: "".to_string(),
         };
         env.validate();
     }

@@ -1,0 +1,18 @@
+[package]
+name = "jwt"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+jsonwebtoken = "9.3.0"
+async-trait.workspace = true
+anyhow.workspace = true
+shaku.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+serde.workspace = true
+tokio.workspace = true
+
+persistence = { path = "../../persistence" }
+commons = { path = "../../commons" }
+

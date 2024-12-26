@@ -13,6 +13,12 @@ pub enum GenericError {
     #[error("Login failed, No user and password found")]
     LoginFailed(u32),
 
+    #[error("Token is invalid")]
+    InvalidToken(u32),
+
+    #[error("Token is expired")]
+    TokenExpired(u32),
+
     #[error("Something went wrong")]
     Unknown(),
 }
@@ -28,5 +34,13 @@ impl GenericError {
 
     pub fn unknown() -> anyhow::Error {
         GenericError::Unknown().into()
+    }
+
+    pub fn invalid_token() -> anyhow::Error {
+        GenericError::InvalidToken(UNAUTHORIZED).into()
+    }
+
+    pub fn token_expired() -> anyhow::Error {
+        GenericError::TokenExpired(UNAUTHORIZED).into()
     }
 }
