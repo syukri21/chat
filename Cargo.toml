@@ -8,11 +8,12 @@ members = [
     "crate/libs/usecases",
     "crate/tests",
     "crate/libs/clients/mail",
-    "crate/libs/clients/crypto"
-]
+    "crate/libs/clients/crypto",
+    "crate/libs/clients/jwt"]
 
 
 [workspace.dependencies]
+jsonwebtoken = "9.3.0"
 shaku = { version = "0.6.2" }
 dotenv = "0.15.0"
 tokio = { version = "1", features = ["full"] }
