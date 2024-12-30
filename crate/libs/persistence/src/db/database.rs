@@ -1,5 +1,5 @@
 use crate::db::sqlite::create_sqlite_db_pool;
-use crate::env::myenv::Env;
+use crate::env::myenv::{Env, EnvInterface};
 use shaku::{Component, Interface};
 use sqlx::{Pool, Sqlite, SqlitePool};
 use std::sync::Arc;
@@ -7,14 +7,26 @@ use std::sync::Arc;
 #[derive(Component)]
 #[shaku(interface = DatabaseInterface)]
 pub struct DB {
-    pool: Arc<Pool<Sqlite>>,
+    #[shaku(inject)]
+    env: Arc<dyn EnvInterface>,
+    pool: Option<Arc<Pool<Sqlite>>>,
+}
+
+impl Default for DB {
+    fn default() -> Self {
+        Self {
+            env: Arc::new(Env::default()),
+            pool: None,
+        }
+    }
 }
 
 impl DB {
     pub async fn new(env: Env) -> anyhow::Result<Self> {
         let pool = create_sqlite_db_pool(env.db_url.as_ref()).await?;
         Ok(Self {
-            pool: Arc::new(pool),
+            env: Arc::new(env),
+            pool: Option::from(Arc::new(pool)),
         })
     }
 
@@ -41,11 +53,37 @@ impl DB {
 #[async_trait::async_trait]
 pub trait DatabaseInterface: Interface + Send + Sync {
     fn get_pool(&self) -> Arc<SqlitePool>;
+    async fn init(&mut self) -> anyhow::Result<()>;
+
+    async fn migrate(&self) {
+        let pool = self.get_pool();
+        sqlx::migrate!("../../../migrations")
+            .run(&*pool)
+            .await
+            .expect("Failed to run database migrations");
+    }
 }
 
+#[async_trait::async_trait]
 impl DatabaseInterface for DB {
     fn get_pool(&self) -> Arc<SqlitePool> {
-        Arc::clone(&self.pool)
+        if self.pool.is_none() {
+            panic!("Database pool is not initialized");
+        }
+        self.pool.as_ref().unwrap().clone()
+    }
+
+    async fn init(&mut self) -> anyhow::Result<()> {
+        if self.pool.is_none() {
+            let pool = create_sqlite_db_pool(self.env.get_db_url())
+                .await
+                .map_err(|e| {
+                    println!("error: {}", e);
+                    panic!("Failed to create database pool");
+                }).unwrap();
+            self.pool = Option::from(Arc::new(pool));
+        }
+        Ok(())
     }
 }
 
@@ -79,6 +117,6 @@ mod tests {
         // Assert that the result is Ok and contains a valid DB instance
         assert!(result.is_ok());
         let db = result.unwrap();
-        assert!(!db.pool.is_closed());
+        assert!(!db.get_pool().is_closed());
     }
 }

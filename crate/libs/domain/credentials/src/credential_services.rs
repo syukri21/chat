@@ -1,18 +1,32 @@
 use crate::credential::Credential;
+use async_trait::async_trait;
 use persistence::DatabaseInterface;
+use shaku::{Component, Interface};
 use sqlx::Row;
 use std::sync::Arc;
 
+#[derive(Component)]
+#[shaku(interface = CredentialServiceInterface)]
 pub struct CredentialService {
-    db: Arc<dyn DatabaseInterface + Send + Sync>,
+    #[shaku(inject)]
+    db: Arc<dyn DatabaseInterface>,
+}
+
+#[async_trait::async_trait]
+pub trait CredentialServiceInterface: Interface {
+    async fn create_credential(&self, credential: &Credential) -> anyhow::Result<()>;
+    async fn get_credential_by_user_id(&self, user_id: uuid::Uuid) -> anyhow::Result<Credential>;
 }
 
 impl CredentialService {
     pub fn new(db: Arc<dyn DatabaseInterface + Send + Sync>) -> Self {
         Self { db }
     }
-    
-    pub async fn create_credential(&self, credential: &Credential) -> anyhow::Result<()> {
+}
+
+#[async_trait]
+impl CredentialServiceInterface for CredentialService {
+    async fn create_credential(&self, credential: &Credential) -> anyhow::Result<()> {
         let mut connection = self.db.get_pool().acquire().await?;
         let query = r#"
             INSERT INTO credentials (
@@ -40,10 +54,7 @@ impl CredentialService {
         Ok(())
     }
 
-    pub async fn get_credential_by_user_id(
-        &self,
-        user_id: uuid::Uuid,
-    ) -> anyhow::Result<Credential> {
+    async fn get_credential_by_user_id(&self, user_id: uuid::Uuid) -> anyhow::Result<Credential> {
         let mut connection = self.db.get_pool().acquire().await?;
         let query = r#"SELECT
             id,
@@ -60,9 +71,12 @@ impl CredentialService {
             .bind(user_id.to_string())
             .fetch_one(&mut *connection)
             .await?;
-        
+
         if row.is_empty() {
-            return Err(anyhow::anyhow!("Credential not found for user_id: {}", user_id));
+            return Err(anyhow::anyhow!(
+                "Credential not found for user_id: {}",
+                user_id
+            ));
         }
 
         let credential = Credential {

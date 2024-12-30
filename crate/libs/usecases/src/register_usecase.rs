@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use commons::generic_errors::GenericError;
 use credentials::credential::Credential;
-use credentials::credential_services::CredentialService;
+use credentials::credential_services::{CredentialService, CredentialServiceInterface};
 use crypto::Encrypt;
 use mail::SendEmail;
 use persistence::Env;

@@ -18,3 +18,5 @@ credentials = { path = "../domain/credentials" }
 commons = { path = "../commons" }
 mail = { path = "../clients/mail" }
 crypto = { path = "../clients/crypto" }
+jwt = { path = "../clients/jwt" }
+

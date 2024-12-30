@@ -25,7 +25,7 @@ pub struct AccessClaims {
     pub alg: String,
 }
 impl AccessClaims {
-    fn new(user_id: String, role: Role) -> Self {
+    pub fn new(user_id: String, role: Role) -> Self {
         Self::new_with_exp(user_id, role, generate_exp())
     }
     fn new_with_exp(user_id: String, role: Role, exp: i64) -> Self {
@@ -83,7 +83,7 @@ pub trait JWTInterface: Interface {
     async fn verify_token(&self, token: &str) -> anyhow::Result<AccessClaims>;
 }
 
-#[derive(Clone, Component)]
+#[derive(Component)]
 #[shaku(interface = JWTInterface)]
 pub struct JWT {
     #[shaku(inject)]
@@ -140,8 +140,8 @@ fn generate_jti() -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use shaku::{module, HasComponent};
     use persistence::Env;
+    use shaku::{module, HasComponent};
 
     module! {
         Module {

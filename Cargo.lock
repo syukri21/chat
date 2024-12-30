@@ -373,8 +373,10 @@ name = "credentials"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
  "chrono",
  "persistence",
+ "shaku",
  "sqlx",
  "tokio",
  "uuid",
@@ -2705,6 +2707,7 @@ dependencies = [
  "commons",
  "credentials",
  "crypto",
+ "jwt",
  "mail",
  "persistence",
  "shaku",
