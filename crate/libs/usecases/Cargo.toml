@@ -11,6 +11,7 @@ anyhow.workspace = true
 sqlx.workspace = true
 async-trait.workspace = true
 shaku.workspace = true
+pretty_env_logger.workspace = true
 
 persistence = { path = "../persistence" }
 users = { path = "../domain/users" }

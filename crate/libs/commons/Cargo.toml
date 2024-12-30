@@ -8,3 +8,4 @@ derive_more.workspace = true
 anyhow.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+log.workspace = true

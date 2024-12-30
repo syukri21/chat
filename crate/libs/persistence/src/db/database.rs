@@ -22,6 +22,15 @@ impl Default for DB {
 }
 
 impl DB {
+    pub async fn default(env: Arc<dyn EnvInterface>) -> Self {
+        let pool = create_sqlite_db_pool(env.get_db_url().as_ref())
+            .await
+            .unwrap();
+        Self {
+            env: Arc::clone(&env),
+            pool: Option::from(Arc::new(pool)),
+        }
+    }
     pub async fn new(env: Env) -> anyhow::Result<Self> {
         let pool = create_sqlite_db_pool(env.db_url.as_ref()).await?;
         Ok(Self {
@@ -80,7 +89,8 @@ impl DatabaseInterface for DB {
                 .map_err(|e| {
                     println!("error: {}", e);
                     panic!("Failed to create database pool");
-                }).unwrap();
+                })
+                .unwrap();
             self.pool = Option::from(Arc::new(pool));
         }
         Ok(())

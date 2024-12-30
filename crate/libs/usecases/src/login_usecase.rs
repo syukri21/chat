@@ -64,27 +64,21 @@ impl LoginUseCaseInterface for LoginUseCase {
             .await
             .map_err(|e| match e.downcast_ref::<Error>() {
                 Some(Error::RowNotFound) => GenericError::login_failed(),
-                _ => GenericError::unknown(),
+                _ => GenericError::unknown(e),
             })?;
 
         let credential = self
             .credential_service
             .get_credential_by_user_id(user.id)
             .await
-            .map_err(|e| {
-                println!("error: {}", e);
-                GenericError::unknown()
-            })?;
+            .map_err(|e| GenericError::unknown(e))?;
 
         let access_claim = AccessClaims::new(user.id.to_string(), Role::Admin);
         let token = self
             .jwt_service
             .generate_token(&access_claim)
             .await
-            .map_err(|e| {
-                println!("error: {}", e);
-                GenericError::unknown()
-            })?;
+            .map_err(|e| GenericError::unknown(e))?;
 
         Ok(LoginResponse {
             token: token.token.to_owned(),
@@ -99,9 +93,12 @@ mod tests {
     use commons::generic_errors::GenericError;
     use credentials::credential_services::CredentialService;
     use jwt::JWT;
+    use persistence::db::database::DBParameters;
+    use persistence::db::sqlite::create_sqlite_db_pool;
     use persistence::env::myenv::EnvInterface;
     use persistence::{DatabaseInterface, Env, DB};
     use shaku::{module, HasComponent};
+    use std::sync::Arc;
     use users::user_services::UserService;
 
     module! {
@@ -113,17 +110,20 @@ mod tests {
 
     #[tokio::test]
     async fn test_login_invalid_username() {
+        pretty_env_logger::init();
         let env = Env::load();
 
+        let pool = Arc::new(create_sqlite_db_pool(env.get_db_url()).await.unwrap());
         let module = MyModule::builder()
             // .with_component_override::<dyn DatabaseInterface>(Box::new(db))
-            .with_component_override_fn(|x| {
-                let db = DB::arc_new(env.clone()).await;
-                Box::new(db)
+            .with_component_parameters::<DB>(DBParameters {
+                pool: Some(pool.clone()),
             })
             .with_component_override::<dyn EnvInterface>(Box::new(env))
             .build();
 
+        let db: &dyn DatabaseInterface = module.resolve_ref();
+        db.migrate().await;
 
         let login_usecase: &dyn LoginUseCaseInterface = module.resolve_ref();
         let result = login_usecase

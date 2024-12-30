@@ -1,3 +1,4 @@
+use log::error;
 use serde::Serialize;
 use thiserror::Error;
 
@@ -32,7 +33,8 @@ impl GenericError {
         GenericError::LoginFailed(UNAUTHORIZED).into()
     }
 
-    pub fn unknown() -> anyhow::Error {
+    pub fn unknown(e: anyhow::Error) -> anyhow::Error {
+        error!("error: {}", e);
         GenericError::Unknown().into()
     }
 
