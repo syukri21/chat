@@ -36,4 +36,8 @@ impl User {
     pub fn activate(&mut self) {
         self.is_active = true;
     }
+
+    pub fn match_password(&self, password: &str) -> bool {
+        bcrypt::verify(password, &self.password).unwrap_or(false)
+    }
 }

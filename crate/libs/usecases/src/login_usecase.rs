@@ -67,24 +67,27 @@ impl LoginUseCaseInterface for LoginUseCase {
                 _ => GenericError::unknown(e),
             })?;
 
+        let is_password_valid = user.match_password(request.password);
+        if !is_password_valid {
+            return Err(GenericError::login_failed());
+        }
+
         let credential = self
             .credential_service
             .get_credential_by_user_id(user.id)
             .await
             .map_err(|e| GenericError::unknown(e))?;
 
-        let access_claim = AccessClaims::new(user.id.to_string(), Role::Admin);
-        let token = self
-            .jwt_service
+        let access_claim = AccessClaims::new(user.id.to_string(), Role::User);
+        self.jwt_service
             .generate_token(&access_claim)
             .await
-            .map_err(|e| GenericError::unknown(e))?;
-
-        Ok(LoginResponse {
-            token: token.token.to_owned(),
-            private_key: credential.private_key.to_owned(),
-            public_key: credential.public_key.to_owned(),
-        })
+            .map_err(|e| GenericError::unknown(e))
+            .map(|token| LoginResponse {
+                token: token.token,
+                private_key: credential.private_key,
+                public_key: credential.public_key,
+            })
     }
 }
 #[cfg(test)]

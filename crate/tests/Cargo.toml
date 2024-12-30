@@ -10,6 +10,9 @@ chrono.workspace = true
 anyhow.workspace = true
 sqlx.workspace = true
 dotenv.workspace = true
+shaku.workspace = true
+pretty_env_logger.workspace = true
+log.workspace = true
 
 persistence = { path = "../libs/persistence" }
 users = { path = "../libs/domain/users" }
@@ -18,3 +21,4 @@ usecases = { path = "../libs/usecases" }
 commons = { path = "../libs/commons" }
 mail = { path = "../libs/clients/mail" }
 crypto = { path = "../libs/clients/crypto" }
+jwt = { path = "../libs/clients/jwt" }
