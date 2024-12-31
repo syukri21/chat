@@ -1,0 +1,62 @@
+erDiagram
+    USER {
+    }
+
+    CHAT {
+        int id PK
+        string name
+        boolean is_group
+        datetime created_at
+        datetime updated_at
+    }
+
+    MESSAGE {
+        int id PK
+        int chat_id FK
+        int sender_id FK
+        text content
+        string message_type
+        string message_key
+        datetime sent_at
+    }
+
+    CHAT_MEMBER {
+        int id PK
+        int chat_id FK
+        int user_id FK
+        datetime joined_at
+    }
+
+    MESSAGE_READ_RECEIPT {
+        int id PK
+        int message_id FK
+        int user_id FK
+        datetime read_at
+    }
+
+    MESSAGE_REACTION {
+        int id PK
+        int message_id FK
+        int user_id FK
+        string reaction
+        datetime reacted_at
+    }
+
+    ATTACHMENT {
+        int id PK
+        int message_id FK
+        string file_url
+        string file_type
+        int file_size
+        datetime uploaded_at
+    }
+
+    USER ||--o{ CHAT_MEMBER: participates
+    CHAT ||--o{ CHAT_MEMBER: has
+    CHAT ||--o{ MESSAGE: contains
+    USER ||--o{ MESSAGE: sends
+    MESSAGE ||--o{ MESSAGE_READ_RECEIPT: has
+    MESSAGE ||--o{ MESSAGE_REACTION: has
+    MESSAGE ||--o{ ATTACHMENT: includes
+    USER ||--o{ MESSAGE_READ_RECEIPT: reads
+    USER ||--o{ MESSAGE_REACTION: reacts
