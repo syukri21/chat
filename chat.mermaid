@@ -3,7 +3,7 @@ erDiagram
     }
 
     CHAT {
-        int id PK
+        uuid id PK
         string name
         boolean is_group
         datetime created_at
@@ -11,9 +11,9 @@ erDiagram
     }
 
     MESSAGE {
-        int id PK
-        int chat_id FK
-        int sender_id FK
+        uuid id PK
+        uuid chat_id FK
+        uuid sender_id FK
         text content
         string message_type
         string message_key
@@ -21,30 +21,30 @@ erDiagram
     }
 
     CHAT_MEMBER {
-        int id PK
-        int chat_id FK
-        int user_id FK
+        uuid id PK
+        uuid chat_id FK
+        uuid user_id FK
         datetime joined_at
     }
 
     MESSAGE_READ_RECEIPT {
-        int id PK
-        int message_id FK
-        int user_id FK
+        uuid id PK
+        uuid message_id FK
+        uuid user_id FK
         datetime read_at
     }
 
     MESSAGE_REACTION {
-        int id PK
-        int message_id FK
-        int user_id FK
+        uuid id PK
+        uuid message_id FK
+        uuid user_id FK
         string reaction
         datetime reacted_at
     }
 
     ATTACHMENT {
-        int id PK
-        int message_id FK
+        uuid id PK
+        uuid message_id FK
         string file_url
         string file_type
         int file_size
