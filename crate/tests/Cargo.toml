@@ -13,6 +13,7 @@ dotenv.workspace = true
 shaku.workspace = true
 pretty_env_logger.workspace = true
 log.workspace = true
+futures = "0.3.31"
 
 persistence = { path = "../libs/persistence" }
 users = { path = "../libs/domain/users" }

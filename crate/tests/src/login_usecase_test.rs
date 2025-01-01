@@ -37,52 +37,81 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_login_usecase() {
+    async fn test_all_login_usecase() {
         let module = setup().await;
+        let (result_login_usecase, result_login_with_invalid_password) = futures::future::join(
+            test_login_usecase(&module),
+            test_login_usecase_with_invalid_password(&module),
+        )
+        .await;
+        // Process results
+        match result_login_usecase {
+            Ok(_) => println!("Task Login usecase completed"),
+            Err(e) => assert!(false, "error: {}", e),
+        }
 
+        match result_login_with_invalid_password {
+            Ok(_) => println!("Task Login usecase with invalid password completed"),
+            Err(e) => assert!(false, "error: {}", e),
+        }
+
+        println!("All tasks completed.");
+    }
+
+    // #[tokio::test]
+    async fn test_login_usecase(module: &TestModule) -> anyhow::Result<()> {
+        println!("test_login_usecase");
         let user_service: &dyn UserServiceInterface = module.resolve_ref();
         let login_usecase: &dyn LoginUseCaseInterface = module.resolve_ref();
         let credential_service: &dyn CredentialServiceInterface = module.resolve_ref();
 
         let user = User::new(
-            String::from("syukri"),
-            String::from("syukrihsb148@gmail.com"),
+            String::from("syukri1"),
+            String::from("syukrihsb148test@gmail.com"),
             String::from("password8"),
-        )
-        .unwrap();
-        user_service.create_user(&user).await.unwrap();
+        )?;
+        user_service.create_user(&user).await?;
         credential_service
             .create_credential(&Credential::new(
                 user.id,
                 "private_key_example",
                 "public_key_example",
             ))
-            .await
-            .unwrap();
+            .await?;
 
         let request = LoginRequest {
-            username: "syukri",
+            username: "syukri1",
             password: "password8",
         };
         let response = login_usecase.login(request).await.unwrap();
-        println!("response: {:#?}", response.token);
-        assert!(response.token.len() > 0);
-        assert!(response.private_key.len() > 0);
-        assert!(response.public_key.len() > 0);
-        assert_eq!(response.public_key, "public_key_example");
-        assert_eq!(response.private_key, "private_key_example");
+        assert!(response.token.len() > 0, "token should not be empty");
+        assert!(
+            response.private_key.len() > 0,
+            "private key should not be empty"
+        );
+        assert!(
+            response.public_key.len() > 0,
+            "public key should not be empty"
+        );
+        assert_eq!(
+            response.public_key, "public_key_example",
+            "public key should be equal"
+        );
+        assert_eq!(
+            response.private_key, "private_key_example",
+            "private key should be equal",
+        );
+        Ok(())
     }
 
-    #[tokio::test]
-    async fn test_login_usecase_with_invalid_password() {
-        let module = setup().await;
-
+    async fn test_login_usecase_with_invalid_password(module: &TestModule) -> anyhow::Result<()> {
+        println!("test_login_usecase_with_invalid_password");
         let user_service: &dyn UserServiceInterface = module.resolve_ref();
         let login_usecase: &dyn LoginUseCaseInterface = module.resolve_ref();
         let credential_service: &dyn CredentialServiceInterface = module.resolve_ref();
 
         let user = User::new(
-            String::from("syukri"),
+            String::from("syukritest"),
             String::from("syukrihsb148@gmail.com"),
             String::from("password8"),
         )
@@ -98,11 +127,15 @@ mod tests {
             .unwrap();
 
         let request = LoginRequest {
-            username: "syukri",
+            username: "syukritest",
             password: "invalid_password",
         };
         let response = login_usecase.login(request).await;
-        assert!(response.is_err());
-        assert!(response.unwrap_err().to_string().contains("Login failed"));
+        assert!(response.is_err(), "response should be error");
+        assert!(
+            response.unwrap_err().to_string().contains("Login failed"),
+            "error message should contain 'Login failed'"
+        );
+        Ok(())
     }
 }

@@ -1,5 +1,5 @@
 [databas]
-url = "sqlite://app.DB?mode=rw"
+url = "sqlite://app.db"
 
 [migrate]
 reversible = true
