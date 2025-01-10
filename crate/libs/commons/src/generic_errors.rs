@@ -26,10 +26,12 @@ pub enum GenericError {
 
 impl GenericError {
     pub fn invalid_input(message: String) -> anyhow::Error {
+        error!("invalid input: {}", message);
         GenericError::InvalidInput(message, INVALID_INPUT).into()
     }
 
     pub fn login_failed() -> anyhow::Error {
+        error!("login failed");
         GenericError::LoginFailed(UNAUTHORIZED).into()
     }
 
@@ -39,10 +41,12 @@ impl GenericError {
     }
 
     pub fn invalid_token() -> anyhow::Error {
+        error!("invalid token");
         GenericError::InvalidToken(UNAUTHORIZED).into()
     }
 
     pub fn token_expired() -> anyhow::Error {
+        error!("token expired");
         GenericError::TokenExpired(UNAUTHORIZED).into()
     }
 }
