@@ -1,12 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use crate::utils::setup_db;
     use credentials::credential_services::CredentialService;
     use crypto::Crypto;
     use mail::Mail;
     use persistence::Env;
     use std::sync::Arc;
     use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
+    use usecases::utils::setup_db;
     use users::user::User;
     use users::user_services::{UserService, UserServiceInterface};
 

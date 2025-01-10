@@ -2,7 +2,7 @@ use persistence::{DatabaseInterface, Env, DB};
 use std::sync::Arc;
 
 #[allow(dead_code)]
-pub(crate) async fn setup_db() -> Arc<dyn DatabaseInterface + Send + Sync> {
+pub async fn setup_db() -> Arc<dyn DatabaseInterface + Send + Sync> {
     let db_path = ":memory:"; // Use an in-memory database for tests
     let env = Env {
         db_url: format!("sqlite:{}", db_path),
@@ -20,7 +20,7 @@ pub(crate) async fn setup_db() -> Arc<dyn DatabaseInterface + Send + Sync> {
 
     // Apply migrations
     let pool = db.get_pool();
-    sqlx::migrate!("../../migrations")
+    sqlx::migrate!("../../../migrations")
         .run(&*pool)
         .await
         .expect("Failed to run database migrations");

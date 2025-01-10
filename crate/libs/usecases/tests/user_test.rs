@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::utils::setup_db;
+    use usecases::utils::setup_db;
     use users::user::User;
     use users::user_services::{UserService, UserServiceInterface};
 

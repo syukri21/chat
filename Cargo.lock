@@ -279,6 +279,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
+ "log",
  "persistence",
  "shaku",
  "sqlx",
@@ -2548,30 +2549,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tests"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "chrono",
- "commons",
- "credentials",
- "crypto",
- "dotenv",
- "futures",
- "jwt",
- "log",
- "mail",
- "persistence",
- "pretty_env_logger",
- "shaku",
- "sqlx",
- "tokio",
- "usecases",
- "users",
- "uuid",
-]
-
-[[package]]
 name = "thiserror"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2847,6 +2824,8 @@ dependencies = [
  "commons",
  "credentials",
  "crypto",
+ "dotenv",
+ "futures",
  "jwt",
  "mail",
  "persistence",

@@ -13,6 +13,9 @@ async-trait.workspace = true
 shaku.workspace = true
 pretty_env_logger.workspace = true
 
+futures = "0.3.31"
+dotenv.workspace = true
+
 persistence = { path = "../persistence" }
 users = { path = "../domain/users" }
 credentials = { path = "../domain/credentials" }
@@ -20,4 +23,3 @@ commons = { path = "../commons" }
 mail = { path = "../clients/mail" }
 crypto = { path = "../clients/crypto" }
 jwt = { path = "../clients/jwt" }
-

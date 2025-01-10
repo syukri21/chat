@@ -9,6 +9,19 @@ pub struct Chat {
     pub updated_at: Option<chrono::NaiveDateTime>,
 }
 
+impl Chat {
+    pub fn from_user1and2(user_1_id: &str, user_2_id: &str) -> Self {
+        let chat = Chat::default();
+        Self {
+            id: chat.id,
+            name: format!("{}-{}", user_1_id, user_2_id),
+            is_group: chat.is_group,
+            created_at: chat.created_at,
+            updated_at: chat.updated_at,
+        }
+    }
+}
+
 impl Default for Chat {
     fn default() -> Self {
         Self {
@@ -38,6 +51,28 @@ pub struct ChatMember {
     pub chat_id: Uuid,
     pub user_id: Uuid,
     pub joined_at: Option<chrono::NaiveDateTime>,
+}
+
+impl ChatMember {
+    pub fn new(chat_id: Uuid, user_id: Uuid) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            chat_id,
+            user_id,
+            joined_at: Option::from(chrono::Local::now().naive_local()),
+        }
+    }
+}
+
+impl Default for ChatMember {
+    fn default() -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            chat_id: Default::default(),
+            user_id: Default::default(),
+            joined_at: Option::from(chrono::Local::now().naive_local()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

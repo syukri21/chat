@@ -10,6 +10,7 @@ async-trait.workspace = true
 anyhow.workspace = true
 shaku.workspace = true
 sqlx.workspace = true
+log.workspace = true
 
 
 persistence = { path = "../../persistence" }
