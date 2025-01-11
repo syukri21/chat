@@ -1,3 +1,4 @@
+use anyhow::Error;
 use log::error;
 use serde::Serialize;
 use thiserror::Error;
@@ -22,6 +23,9 @@ pub enum GenericError {
 
     #[error("Something went wrong")]
     Unknown(),
+
+    #[error("User not found")]
+    UserNotFound(),
 }
 
 impl GenericError {
@@ -48,5 +52,10 @@ impl GenericError {
     pub fn token_expired() -> anyhow::Error {
         error!("token expired");
         GenericError::TokenExpired(UNAUTHORIZED).into()
+    }
+
+    pub fn user_not_found(error: Error) -> anyhow::Error {
+        error!("user not found :{}", error);
+        GenericError::UserNotFound().into()
     }
 }

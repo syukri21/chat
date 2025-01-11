@@ -12,13 +12,15 @@ sqlx.workspace = true
 async-trait.workspace = true
 shaku.workspace = true
 pretty_env_logger.workspace = true
-
 futures = "0.3.31"
 dotenv.workspace = true
+log.workspace = true
+env_logger = "0.11.6"
 
 persistence = { path = "../persistence" }
 users = { path = "../domain/users" }
 credentials = { path = "../domain/credentials" }
+chats = { path = "../domain/chats" }
 commons = { path = "../commons" }
 mail = { path = "../clients/mail" }
 crypto = { path = "../clients/crypto" }
