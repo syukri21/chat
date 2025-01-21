@@ -55,7 +55,7 @@ async fn main() {
                         some_other_field = tracing::field::Empty,
                     )
                 })
-                .on_request(|_request: &Request<_>, span: &Span| {
+                .on_request(|_request: &Request<_>, _span: &Span| {
                     // You can use `_span.record("some_other_field", value)` in one of these
                     // closures to attach a value to the initially empty field in the info_span
                     // created above.
@@ -88,8 +88,7 @@ async fn main() {
 }
 
 async fn handler() -> Html<&'static str> {
-    tracing::info!("Hello, World!");
-    Html("<h1>Hello, World!</h1>")
+    Html(include_str!("../static/page/chat.html"))
 }
 async fn shutdown_signal() {
     let ctrl_c = async {

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+<div class="w-full max-w-md bg-white shadow-lg rounded-lg flex flex-col h-[600px]">
+    <!-- Header -->
+    <div class="bg-blue-600 text-white px-4 py-3 rounded-t-lg flex justify-between items-center">
+        <h1 class="text-lg font-bold">Chat Application</h1>
+        <button class="text-sm bg-blue-700 px-2 py-1 rounded hover:bg-blue-800">Logout</button>
+    </div>
+
+    <!-- Messages -->
+    <div id="messages" class="flex-1 overflow-y-auto px-4 py-2 space-y-3 bg-gray-50">
+        <!-- Message Sent -->
+        <div class="flex justify-end">
+            <div class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md max-w-xs">
+                Hi there!
+            </div>
+        </div>
+        <!-- Message Received -->
+        <div class="flex justify-start">
+            <div class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg shadow-md max-w-xs">
+                Hello! How can I help you today?
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Box -->
+    <div class="bg-gray-200 p-4 rounded-b-lg">
+        <form id="chatForm" class="flex space-x-2">
+            <input
+                    type="text"
+                    id="messageInput"
+                    class="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Type a message..."
+                    required>
+            <button
+                    type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                Send
+            </button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
