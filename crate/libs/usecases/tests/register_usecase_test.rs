@@ -5,8 +5,8 @@ mod tests {
     use mail::Mail;
     use persistence::Env;
     use std::sync::Arc;
-    use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
     use usecases::utils::setup_db;
+    use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
     use users::user::User;
     use users::user_services::{UserService, UserServiceInterface};
 

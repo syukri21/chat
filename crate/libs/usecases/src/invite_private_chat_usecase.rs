@@ -13,10 +13,8 @@ pub struct InvitePrivateChatRequest {
 }
 #[async_trait::async_trait]
 pub trait InvitePrivateChatUsecaseInterface: Interface + Send + Sync {
-    async fn invite_private_chat(
-        &self,
-        request: &InvitePrivateChatRequest,
-    ) -> anyhow::Result<Uuid>;
+    async fn invite_private_chat(&self, request: &InvitePrivateChatRequest)
+        -> anyhow::Result<Uuid>;
 }
 
 #[derive(Component)]

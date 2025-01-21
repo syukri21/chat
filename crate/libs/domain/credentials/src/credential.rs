@@ -12,16 +12,12 @@ pub struct Credential {
 }
 
 impl Credential {
-    pub fn new(
-        user_id: Uuid,
-        private_key: &str,
-        public_key: &str,
-    ) -> Self {
+    pub fn new(user_id: Uuid, private_key: &str, public_key: &str) -> Self {
         Self {
             id: Uuid::new_v4(),
             user_id,
-            private_key:private_key.to_string(),
-            public_key:public_key.to_string(),
+            private_key: private_key.to_string(),
+            public_key: public_key.to_string(),
             r#type: String::from("CHAT_KEY"),
             created_at: Some(chrono::Local::now().naive_local()),
             updated_at: Some(chrono::Local::now().naive_local()),
