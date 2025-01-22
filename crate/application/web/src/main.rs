@@ -4,10 +4,12 @@ use axum::http::{HeaderMap, Request};
 use axum::response::{Html, Response};
 use axum::routing::get;
 use axum::Router;
+use std::path::PathBuf;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::signal;
 use tower_http::classify::ServerErrorsFailureClass;
+use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -15,11 +17,12 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 async fn main() {
     // initialize tracing
     tracing_init();
-
     // build our application with a route
     let app = Router::new()
         .route("/", get(home))
         .route("/login", get(login));
+
+    let app = with_assets(app);
     let app = with_tracing(app);
 
     // run it
@@ -30,7 +33,14 @@ async fn main() {
         .await
         .unwrap();
 }
-
+fn with_assets(router: Router) -> Router {
+    let assets_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets");
+    let index_assets = assets_dir.join("index.html");
+    let dir = ServeDir::new(assets_dir).not_found_service(ServeFile::new(index_assets));
+    router
+        .nest_service("/assets", dir.clone())
+        .fallback_service(dir)
+}
 fn tracing_init() {
     tracing_subscriber::registry()
         .with(
@@ -47,7 +57,6 @@ fn tracing_init() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 }
-
 fn with_tracing(app: Router) -> Router {
     // `TraceLayer` is provided by tower-http so you have to add that as a dependency.
     // It provides good defaults but is also very customizable.
@@ -96,14 +105,6 @@ fn with_tracing(app: Router) -> Router {
             ),
     )
 }
-
-async fn home() -> Html<&'static str> {
-    Html(include_str!("../static/page/chat.html"))
-}
-
-async fn login() -> Html<&'static str> {
-    Html(include_str!("../static/page/login.html"))
-}
 async fn shutdown_signal() {
     let ctrl_c = async {
         signal::ctrl_c()
@@ -128,4 +129,10 @@ async fn shutdown_signal() {
         _ = ctrl_c => {},
         _ = terminate => {},
     }
+}
+async fn home() -> Html<&'static str> {
+    Html(include_str!("../page/chat.html"))
+}
+async fn login() -> Html<&'static str> {
+    Html(include_str!("../page/login.html"))
 }
