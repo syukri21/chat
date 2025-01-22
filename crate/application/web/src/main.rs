@@ -20,7 +20,8 @@ async fn main() {
     // build our application with a route
     let app = Router::new()
         .route("/", get(home))
-        .route("/login", get(login));
+        .route("/login", get(login))
+        .route("/signup", get(signup));
 
     let app = with_assets(app);
     let app = with_tracing(app);
@@ -135,4 +136,7 @@ async fn home() -> Html<&'static str> {
 }
 async fn login() -> Html<&'static str> {
     Html(include_str!("../page/login.html"))
+}
+async fn signup() -> Html<&'static str> {
+    Html(include_str!("../page/signup.html"))
 }
