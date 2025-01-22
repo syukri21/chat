@@ -17,7 +17,9 @@ async fn main() {
     tracing_init();
 
     // build our application with a route
-    let app = Router::new().route("/", get(handler));
+    let app = Router::new()
+        .route("/", get(home))
+        .route("/login", get(login));
     let app = with_tracing(app);
 
     // run it
@@ -95,8 +97,12 @@ fn with_tracing(app: Router) -> Router {
     )
 }
 
-async fn handler() -> Html<&'static str> {
+async fn home() -> Html<&'static str> {
     Html(include_str!("../static/page/chat.html"))
+}
+
+async fn login() -> Html<&'static str> {
+    Html(include_str!("../static/page/login.html"))
 }
 async fn shutdown_signal() {
     let ctrl_c = async {
