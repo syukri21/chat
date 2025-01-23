@@ -12,7 +12,6 @@ use mail::Mail;
 use persistence::{DatabaseInterface, Env, DB};
 use shaku::{module, HasComponent};
 use std::path::PathBuf;
-use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::signal;
@@ -21,7 +20,7 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use usecases::{utils, InvitePrivateChatUsecase, RegisterUseCase, RegisterUseCaseInterface};
+use usecases::{utils, InvitePrivateChatUsecase, RegisterUseCase };
 use users::user_services::UserService;
 
 // Add this near the top with other modules
@@ -43,13 +42,11 @@ async fn main() {
     let db: &dyn DatabaseInterface = module.resolve_ref();
     db.migrate().await;
 
-    let register_usecase: Arc<dyn RegisterUseCaseInterface> = module.resolve();
-
     // build our application with a route
     // In main function
     let htmx_app = Router::new().route(
         "/register",
-        post(htmx_handler::register).with_state(register_usecase),
+        post(htmx_handler::register).with_state(module.resolve()),
     );
     let app = Router::new()
         .route("/", get(home))

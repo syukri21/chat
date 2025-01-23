@@ -9,7 +9,7 @@ pub const UNAUTHORIZED: u32 = 401;
 
 #[derive(Debug, Serialize, Error)]
 pub enum GenericError {
-    #[error("invalid input: {0}")]
+    #[error("{0}")]
     InvalidInput(String, u32),
 
     #[error("Login failed, No user and password found")]

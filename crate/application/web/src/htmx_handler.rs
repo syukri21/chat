@@ -29,8 +29,8 @@ impl RegisterForm {
 }
 fn render_error_alert(message: String) -> String {
     format!(
-        r#"<div class="mb-4 p-4 text-red-700 bg-red-100 rounded-lg" role="alert">
-            <p>{}</p>
+        r#"<div class="mb-4 p-4 text-red-700 text-sm bg-red-100 rounded-lg" role="alert">
+            <p class="text-center">{}</p>
         </div>"#,
         message,
     )
@@ -43,12 +43,15 @@ pub async fn register(
     tracing::info!("Htmx register Started with username: {}", form.username);
 
     match register_usecase.register(&form.to_register_request()).await {
-        Ok(_) => Html(
-            include_str!("../page/htmx/signup_success.html")
-                .parse::<String>()
-                .unwrap(),
-        )
-        .into_response(),
+        Ok(_) => {
+            tracing::info!("Registration successful");
+            Html(
+                include_str!("../page/htmx/signup_success.html")
+                    .parse::<String>()
+                    .unwrap(),
+            )
+            .into_response()
+        }
         Err(e) => {
             tracing::error!("Registration failed: {}", e);
             let error_message = match e.downcast_ref::<GenericError>() {
