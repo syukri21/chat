@@ -2,7 +2,7 @@ use axum::body::Bytes;
 use axum::extract::MatchedPath;
 use axum::http::{HeaderMap, Request};
 use axum::response::{Html, Response};
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::Router;
 use std::path::PathBuf;
 use std::time::Duration;
@@ -14,15 +14,24 @@ use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+// Add this near the top with other modules
+mod htmx_handler;
+
 #[tokio::main]
 async fn main() {
     // initialize tracing
     tracing_init();
     // build our application with a route
+    // In main function
+    let htmx_app = Router::new().route("/register", post(htmx_handler::register));
     let app = Router::new()
         .route("/", get(home))
         .route("/login", get(login))
-        .route("/signup", get(signup));
+        .route("/signup", get(signup))
+        .nest(
+            "/htmx",
+            htmx_app,
+        );
 
     let app = with_assets(app);
     let app = with_tracing(app);
@@ -143,3 +152,4 @@ async fn login() -> Html<&'static str> {
 async fn signup() -> Html<&'static str> {
     Html(include_str!("../page/signup.html"))
 }
+// Remove the htmx_register function as it's now in htmx_handler.rs

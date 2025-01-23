@@ -6,10 +6,11 @@ use crypto::Encrypt;
 use mail::SendEmail;
 use persistence::Env;
 use std::sync::Arc;
+use serde::Deserialize;
 use users::user::User;
 use users::user_services::{UserService, UserServiceInterface};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct RegisterRequest<'a> {
     pub username: &'a str,
     pub email: &'a str,

@@ -3302,6 +3302,7 @@ dependencies = [
  "mail",
  "persistence",
  "pretty_env_logger",
+ "serde",
  "shaku",
  "sqlx",
  "tokio",
@@ -3447,10 +3448,12 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "futures",
+ "serde",
  "tokio",
  "tower-http",
  "tracing",
  "tracing-subscriber",
+ "usecases",
  "uuid",
 ]
 
