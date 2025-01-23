@@ -24,6 +24,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    
     - uses: actions/checkout@v4
+    - name: Print name
+      run: echo "Hello ${{secrets.APP_KEY_JWT}}"
+      env:
+        BUILD: 'We are currently running the Build job'
     - name: Run tests
       run: cargo test 
