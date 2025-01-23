@@ -8,6 +8,7 @@ mail-send = { version = "0.4.9" }
 async-trait.workspace = true
 anyhow.workspace = true
 tokio.workspace = true
+shaku.workspace = true
 
 
 persistence = { path = "../../persistence" }

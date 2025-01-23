@@ -5,51 +5,40 @@ use aes_gcm::{AeadCore, AesGcm};
 use aes_gcm::{Aes256Gcm, Key};
 use base64::engine::general_purpose;
 use base64::Engine;
-use persistence::Env;
+use persistence::env::myenv::EnvInterface;
+use shaku::{Component, Interface};
 use std::sync::Arc;
 // Or `Aes128Gcm`
 
-#[derive(Debug, PartialEq, Copy, Clone)]
-pub struct CryptoConfig<'a> {
-    pub app_key_main: &'a str,
+#[derive(Component)]
+#[shaku(interface = Encrypt)]
+pub struct Crypto {
+    #[shaku(inject)]
+    env: Arc<dyn EnvInterface>,
 }
 
-impl CryptoConfig<'_> {
-    pub fn new(env: &Env) -> CryptoConfig {
-        CryptoConfig {
-            app_key_main: &env.app_key_main,
-        }
-    }
-}
-
-pub struct Crypto<'a> {
-    pub config: CryptoConfig<'a>,
-}
-
-impl<'a> Crypto<'a> {
-    pub fn new(env: &'a Env) -> Crypto<'a> {
-        Crypto {
-            config: CryptoConfig::new(env),
-        }
+impl Crypto {
+    pub fn new(env: Arc<dyn EnvInterface>) -> Crypto {
+        Crypto { env }
     }
 
-    pub fn new_arc(env: &'a Env) -> Arc<dyn Encrypt + Send + Sync + 'a> {
+    pub fn new_arc(env: Arc<dyn EnvInterface>) -> Arc<dyn Encrypt + Send + Sync> {
         Arc::new(Crypto::new(env))
     }
 }
 
 #[async_trait::async_trait]
 #[allow(dead_code)]
-pub trait Encrypt {
+pub trait Encrypt: Interface {
     async fn encrypt(&self, data: &str) -> anyhow::Result<String>;
     async fn decrypt(&self, data: &str) -> anyhow::Result<String>;
     async fn decrypt_oy(&self, data: &str) -> anyhow::Result<String>;
 }
 
 #[async_trait::async_trait]
-impl Encrypt for Crypto<'_> {
+impl Encrypt for Crypto {
     async fn encrypt(&self, data: &str) -> anyhow::Result<String> {
-        let key = Key::<Aes256Gcm>::from_slice(self.config.app_key_main.as_bytes());
+        let key = Key::<Aes256Gcm>::from_slice(self.env.get_app_key_main().as_bytes());
         let cipher = Aes256Gcm::new(key);
 
         let nonce: Nonce<AesGcm<Aes256, U12>> = Aes256Gcm::generate_nonce(&mut OsRng); // 96-bits; unique per message
@@ -67,7 +56,7 @@ impl Encrypt for Crypto<'_> {
         let nonce = general_purpose::URL_SAFE_NO_PAD.decode(nonce_str)?;
         let nonce = Nonce::<Aes256Gcm>::from_slice(&nonce);
         let ciphertext = general_purpose::URL_SAFE_NO_PAD.decode(ciphertext_str)?;
-        let key = Key::<Aes256Gcm>::from_slice(self.config.app_key_main.as_bytes());
+        let key = Key::<Aes256Gcm>::from_slice(self.env.get_app_key_main().as_bytes());
         let cipher = Aes256Gcm::new(key);
 
         let plaintext = cipher
@@ -84,7 +73,7 @@ impl Encrypt for Crypto<'_> {
         let nonce = general_purpose::URL_SAFE_NO_PAD.decode(parts[0])?;
         let nonce = Nonce::<Aes256Gcm>::from_slice(&nonce);
         let ciphertext = general_purpose::URL_SAFE_NO_PAD.decode(parts[1])?;
-        let key = Key::<Aes256Gcm>::from_slice(self.config.app_key_main.as_bytes());
+        let key = Key::<Aes256Gcm>::from_slice(self.env.get_app_key_main().as_bytes());
         let cipher = Aes256Gcm::new(key);
 
         let plaintext = cipher
@@ -102,7 +91,8 @@ mod tests {
     #[tokio::test]
     async fn test_encrypt_decrypt_oy() {
         dotenv::dotenv().ok();
-        let env = Box::leak(Box::new(Env::new()));
+        let env: dyn EnvInterface = Env::new();
+        let env = Arc::new(env);
         let crypto = Crypto::new(env);
         let data = "Hello, world!";
         let encrypted = match crypto.encrypt(data).await {

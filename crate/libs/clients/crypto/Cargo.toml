@@ -9,6 +9,7 @@ base64 = { version = "0.22.1" }
 tokio.workspace = true
 async-trait.workspace = true
 dotenv.workspace = true
+shaku.workspace = true
 
 anyhow.workspace = true
 persistence = { path = "../../persistence" }

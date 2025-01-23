@@ -1,14 +1,15 @@
 use async_trait::async_trait;
 use commons::generic_errors::GenericError;
 use credentials::credential::Credential;
-use credentials::credential_services::{CredentialService, CredentialServiceInterface};
+use credentials::credential_services::CredentialServiceInterface;
 use crypto::Encrypt;
 use mail::SendEmail;
-use persistence::Env;
-use std::sync::Arc;
+use persistence::env::myenv::EnvInterface;
 use serde::Deserialize;
+use shaku::{Component, Interface};
+use std::sync::Arc;
 use users::user::User;
-use users::user_services::{UserService, UserServiceInterface};
+use users::user_services::UserServiceInterface;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct RegisterRequest<'a> {
@@ -61,20 +62,27 @@ impl RegisterRequest<'_> {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RegisterResponse {}
 
-pub struct RegisterUseCase<'a> {
-    user_service: Arc<UserService>,
-    credential_service: Arc<CredentialService>,
-    mail: Arc<dyn SendEmail + Send + Sync>,
-    env: &'a Env,
-    crypto: Arc<dyn Encrypt + Send + Sync>,
+#[derive(Component)]
+#[shaku(interface = RegisterUseCaseInterface)]
+pub struct RegisterUseCase {
+    #[shaku(inject)]
+    user_service: Arc<dyn UserServiceInterface>,
+    #[shaku(inject)]
+    credential_service: Arc<dyn CredentialServiceInterface>,
+    #[shaku(inject)]
+    env: Arc<dyn EnvInterface>,
+    #[shaku(inject)]
+    mail: Arc<dyn SendEmail>,
+    #[shaku(inject)]
+    crypto: Arc<dyn Encrypt>,
 }
 
-impl<'a> RegisterUseCase<'a> {
+impl RegisterUseCase {
     pub fn new(
-        user_service: Arc<UserService>,
-        credential_service: Arc<CredentialService>,
+        user_service: Arc<dyn UserServiceInterface>,
+        credential_service: Arc<dyn CredentialServiceInterface>,
         mail: Arc<dyn SendEmail + Send + Sync>,
-        env: &'a Env,
+        env: Arc<dyn EnvInterface>,
         encrypt: Arc<dyn Encrypt + Send + Sync>,
     ) -> Self {
         Self {
@@ -88,7 +96,7 @@ impl<'a> RegisterUseCase<'a> {
 }
 
 #[async_trait]
-pub trait RegisterUseCaseInterface {
+pub trait RegisterUseCaseInterface: Interface {
     async fn register<'a>(&self, request: &RegisterRequest<'a>)
         -> anyhow::Result<RegisterResponse>;
     async fn activate_user<'a>(&self, encrypted_user_id: &'a str) -> anyhow::Result<()>;
@@ -102,7 +110,7 @@ pub trait RegisterUseCaseInterface {
 }
 
 #[async_trait]
-impl RegisterUseCaseInterface for RegisterUseCase<'_> {
+impl RegisterUseCaseInterface for RegisterUseCase {
     async fn register<'a>(
         &self,
         request: &RegisterRequest<'a>,
@@ -139,7 +147,8 @@ impl RegisterUseCaseInterface for RegisterUseCase<'_> {
 
         let button = format!(
             r#"<a href="{}/activate/{}">Activate account</a>"#,
-            self.env.app_callback_url, encrypted_user_id
+            self.env.get_app_callback_url(),
+            encrypted_user_id
         );
         let message = format!(
             r#"

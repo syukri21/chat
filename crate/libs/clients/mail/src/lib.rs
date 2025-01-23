@@ -1,56 +1,28 @@
 use mail_send::mail_builder::MessageBuilder;
 use mail_send::SmtpClientBuilder;
-use persistence::Env;
+use persistence::env::myenv::EnvInterface;
+use shaku::{Component, Interface};
 use std::sync::Arc;
 
-pub struct Mail<'a> {
-    mail_config: MailConfig<'a>,
+#[derive(Component)]
+#[shaku(interface = SendEmail)]
+pub struct Mail {
+    #[shaku(inject)]
+    env: Arc<dyn EnvInterface>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MailConfig<'a> {
-    from: &'a str,
-    from_email: &'a str,
-    smtp_username: &'a str,
-    smtp_password: &'a str,
-    smtp_host: &'a str,
-    smtp_port: &'a str,
-}
-
-impl<'a> MailConfig<'a> {
-    pub fn from_env(env: &'a Env) -> MailConfig<'a> {
-        Self {
-            from: &env.email_from,
-            from_email: &env.email_from_email,
-            smtp_username: &env.email_smtp_username,
-            smtp_password: &env.email_smtp_password,
-            smtp_host: &env.email_smtp_host,
-            smtp_port: &env.email_smtp_port,
-        }
-    }
-}
-
-impl<'a> Mail<'a> {
-    pub fn new(env: &'a Env) -> Self {
-        Self {
-            mail_config: MailConfig {
-                from: &env.email_from,
-                from_email: &env.email_from_email,
-                smtp_username: &env.email_smtp_username,
-                smtp_password: &env.email_smtp_password,
-                smtp_host: &env.email_smtp_host,
-                smtp_port: &env.email_smtp_port,
-            },
-        }
+impl Mail {
+    pub fn new(env: Arc<dyn EnvInterface>) -> Self {
+        Self { env }
     }
 
-    pub fn new_arc(env: &'a Env) -> Arc<dyn SendEmail + Send + Sync + 'a> {
+    pub fn new_arc(env: Arc<dyn EnvInterface>) -> Arc<dyn SendEmail> {
         Arc::new(Mail::new(env))
     }
 }
 
 #[async_trait::async_trait]
-pub trait SendEmail {
+pub trait SendEmail: Interface {
     async fn send_email(
         &self,
         to: &str,
@@ -61,7 +33,7 @@ pub trait SendEmail {
 }
 
 #[async_trait::async_trait]
-impl SendEmail for Mail<'_> {
+impl SendEmail for Mail {
     async fn send_email(
         &self,
         to: &str,
@@ -71,7 +43,7 @@ impl SendEmail for Mail<'_> {
     ) -> anyhow::Result<()> {
         // Build a simple multipart message
         let message = MessageBuilder::new()
-            .from((self.mail_config.from, self.mail_config.from_email))
+            .from((self.env.get_email_from(), self.env.get_email_from_email()))
             .to(vec![(to, to_email)])
             .subject(subject)
             .html_body(body)
@@ -80,13 +52,13 @@ impl SendEmail for Mail<'_> {
         // Connect to the SMTP submissions port, upgrade to TLS and
         // authenticate using the provided credentials.
         SmtpClientBuilder::new(
-            self.mail_config.smtp_host,
-            self.mail_config.smtp_port.parse()?,
+            self.env.get_email_smtp_host(),
+            self.env.get_email_smtp_port().parse()?,
         )
         .implicit_tls(false)
         .credentials((
-            self.mail_config.smtp_username,
-            self.mail_config.smtp_password,
+            self.env.get_email_smtp_username(),
+            self.env.get_email_smtp_password(),
         ))
         .connect()
         .await?

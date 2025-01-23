@@ -10,8 +10,18 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 uuid.workspace = true
 serde.workspace = true
+shaku.workspace = true
+anyhow.workspace = true
 
 axum = {version = "0.8.1", features = ["ws"]}
 tower-http = { version = "0.6.1", features = ["trace", "fs"] }
 
 usecases = { path = "../../libs/usecases" }
+persistence = { path = "../../libs/persistence" }
+users = { path = "../../libs/domain/users" }
+credentials = { path = "../../libs/domain/credentials" }
+chats = { path = "../../libs/domain/chats" }
+commons = { path = "../../libs/commons" }
+mail = { path = "../../libs/clients/mail" }
+crypto = { path = "../../libs/clients/crypto" }
+jwt = { path = "../../libs/clients/jwt" }

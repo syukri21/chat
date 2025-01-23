@@ -4,7 +4,15 @@ use axum::http::{HeaderMap, Request};
 use axum::response::{Html, Response};
 use axum::routing::{get, post};
 use axum::Router;
+use chats::chat_services::ChatService;
+use credentials::credential_services::CredentialService;
+use crypto::Crypto;
+use jwt::JWT;
+use mail::Mail;
+use persistence::{DatabaseInterface, Env, DB};
+use shaku::{module, HasComponent};
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::signal;
@@ -13,25 +21,41 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use usecases::{utils, InvitePrivateChatUsecase, RegisterUseCase, RegisterUseCaseInterface};
+use users::user_services::UserService;
 
 // Add this near the top with other modules
 mod htmx_handler;
+
+module! {
+     WebModule {
+        components = [InvitePrivateChatUsecase, RegisterUseCase, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto ],
+        providers = []
+    }
+}
 
 #[tokio::main]
 async fn main() {
     // initialize tracing
     tracing_init();
+
+    let module = utils::setup_module::<WebModule>(WebModule::builder()).await;
+    let db: &dyn DatabaseInterface = module.resolve_ref();
+    db.migrate().await;
+
+    let register_usecase: Arc<dyn RegisterUseCaseInterface> = module.resolve();
+
     // build our application with a route
     // In main function
-    let htmx_app = Router::new().route("/register", post(htmx_handler::register));
+    let htmx_app = Router::new().route(
+        "/register",
+        post(htmx_handler::register).with_state(register_usecase),
+    );
     let app = Router::new()
         .route("/", get(home))
         .route("/login", get(login))
         .route("/signup", get(signup))
-        .nest(
-            "/htmx",
-            htmx_app,
-        );
+        .nest("/htmx", htmx_app);
 
     let app = with_assets(app);
     let app = with_tracing(app);

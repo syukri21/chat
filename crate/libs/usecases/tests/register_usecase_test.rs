@@ -5,6 +5,7 @@ mod tests {
     use mail::Mail;
     use persistence::Env;
     use std::sync::Arc;
+    use persistence::env::myenv::EnvInterface;
     use usecases::utils::setup_db;
     use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
     use users::user::User;
@@ -14,8 +15,9 @@ mod tests {
     async fn test_register_usecase() {
         dotenv::dotenv().ok();
         let env: &'static Env = Box::leak(Box::new(Env::new()));
+        let env1: dyn EnvInterface  = Env::new();
         let db = setup_db().await;
-        let mail = Mail::new_arc(&env);
+        let mail = Mail::new_arc(Arc::new(env));
         let user_service = Arc::new(UserService::new(Arc::clone(&db)));
         let credential_service = Arc::new(CredentialService::new(Arc::clone(&db)));
         let encrypt = Crypto::new_arc(&env);
@@ -24,7 +26,7 @@ mod tests {
             Arc::clone(&user_service),
             Arc::clone(&credential_service),
             Arc::clone(&mail),
-            &env,
+            Arc::clone(env),
             Arc::clone(&encrypt),
         );
 
@@ -53,7 +55,7 @@ mod tests {
             Arc::clone(&user_service),
             Arc::clone(&credential_service),
             Arc::clone(&mail),
-            &env,
+            Arc::clone(env),
             Arc::clone(&encrypt),
         );
 
