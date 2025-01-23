@@ -6,19 +6,6 @@ on:
   pull_request:
     branches: [ "main" ]
 
-env:
-  CARGO_TERM_COLOR: always
-  DATABASE_URL: ${{ vars.DATABASE_URL || 'sqlite::memory:' }}
-  EMAIL_FROM: ${{ vars.EMAIL_FROM }}
-  EMAIL_FROM_EMAIL: ${{ vars.EMAIL_FROM_EMAIL }}
-  EMAIL_SMTP_USERNAME: ${{ vars.EMAIL_SMTP_USERNAME }}
-  EMAIL_SMTP_PASSWORD: ${{ secrets.EMAIL_SMTP_PASSWORD }}
-  EMAIL_SMTP_HOST: ${{ vars.EMAIL_SMTP_HOST }}
-  EMAIL_SMTP_PORT: ${{ vars.EMAIL_SMTP_PORT }}
-  APP_KEY_MAIN: ${{ secrets.APP_KEY_MAIN }}
-  APP_CALLBACK_URL: ${{ vars.APP_CALLBACK_URL || 'http://localhost:3000/callback' }}
-  APP_KEY_JWT: ${{ secrets.APP_KEY_JWT }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,9 +13,9 @@ jobs:
     steps:
     
     - uses: actions/checkout@v4
-    - name: Print name
-      run: echo "Hello ${{secrets.APP_KEY_JWT}}"
-      env:
-        BUILD: 'We are currently running the Build job'
+    - name: Create .env file
+        run: |
+            touch .env
+            echo "${{secrets.TEST_CHAT_ENV}}" >> .env
     - name: Run tests
       run: cargo test 
