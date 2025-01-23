@@ -13,6 +13,7 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
 #[tokio::main]
 async fn main() {
     // initialize tracing
@@ -34,6 +35,7 @@ async fn main() {
         .await
         .unwrap();
 }
+
 fn with_assets(router: Router) -> Router {
     let assets_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("assets");
     let index_assets = assets_dir.join("index.html");
@@ -58,6 +60,7 @@ fn tracing_init() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 }
+
 fn with_tracing(app: Router) -> Router {
     // `TraceLayer` is provided by tower-http so you have to add that as a dependency.
     // It provides good defaults but is also very customizable.
