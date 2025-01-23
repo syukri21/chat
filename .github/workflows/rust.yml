@@ -18,4 +18,4 @@ jobs:
           touch .env
           echo "${{secrets.TEST_CHAT_ENV}}" >> .env
     - name: Run tests
-      run: cargo test 
+      run: cat .env && cargo test
