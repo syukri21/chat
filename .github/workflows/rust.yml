@@ -14,8 +14,8 @@ jobs:
     
     - uses: actions/checkout@v4
     - name: Create .env file
-        run: |
-            touch .env
-            echo "${{secrets.TEST_CHAT_ENV}}" >> .env
+      run: |
+          touch .env
+          echo "${{secrets.TEST_CHAT_ENV}}" >> .env
     - name: Run tests
       run: cargo test 
