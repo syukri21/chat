@@ -23,7 +23,7 @@ pub trait UserServiceInterface: Interface + Send + Sync {
 }
 
 impl UserService {
-    pub fn new(db: Arc<dyn DatabaseInterface + Send + Sync>) -> Self {
+    pub fn new(db: Arc<dyn DatabaseInterface>) -> Self {
         Self { db }
     }
     fn row_to_user(row: SqliteRow) -> anyhow::Result<User> {

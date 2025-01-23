@@ -19,7 +19,7 @@ pub trait CredentialServiceInterface: Interface {
 }
 
 impl CredentialService {
-    pub fn new(db: Arc<dyn DatabaseInterface + Send + Sync>) -> Self {
+    pub fn new(db: Arc<dyn DatabaseInterface >) -> Self {
         Self { db }
     }
 }

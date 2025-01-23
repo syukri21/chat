@@ -86,13 +86,14 @@ impl Encrypt for Crypto {
 
 #[cfg(test)]
 mod tests {
+    use persistence::Env;
     use super::*;
 
     #[tokio::test]
     async fn test_encrypt_decrypt_oy() {
         dotenv::dotenv().ok();
-        let env: dyn EnvInterface = Env::new();
-        let env = Arc::new(env);
+        let env: Arc<dyn EnvInterface> = Arc::new(Env::load());
+        // let env = Arc::new(env);
         let crypto = Crypto::new(env);
         let data = "Hello, world!";
         let encrypted = match crypto.encrypt(data).await {

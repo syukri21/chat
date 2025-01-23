@@ -6,7 +6,7 @@ use shaku::{HasComponent, ModuleBuilder};
 use std::sync::Arc;
 
 #[allow(dead_code)]
-pub async fn setup_db() -> Arc<dyn DatabaseInterface + Send + Sync> {
+pub async fn setup_db() -> Arc<dyn DatabaseInterface> {
     let db_path = ":memory:"; // Use an in-memory database for tests
     let env = Env {
         db_url: format!("sqlite:{}", db_path),

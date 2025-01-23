@@ -71,13 +71,15 @@ impl SendEmail for Mail {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
     use crate::Mail;
     use crate::SendEmail;
     use persistence::Env;
+    use persistence::env::myenv::EnvInterface;
 
     #[tokio::test]
     async fn test_send_email() {
-        let env = Env {
+        let env: Arc<dyn EnvInterface> = Arc::new(Env {
             db_url: "".to_string(),
             email_from: "admin".to_string(),
             email_from_email: "syukrihsbofficial@gmail.com".to_string(),
@@ -88,8 +90,8 @@ mod tests {
             app_key_main: "testkey".to_string(),
             app_callback_url: "".to_string(),
             app_key_jwt: "".to_string(),
-        };
-        let mail = Mail::new(&env);
+        });
+        let mail = Mail::new(env);
         let result = mail
             .send_email("test", "syukrihsb148@gmail.com", "test", "test")
             .await;

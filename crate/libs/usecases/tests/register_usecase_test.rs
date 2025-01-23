@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use credentials::credential_services::CredentialService;
-    use crypto::Crypto;
-    use mail::Mail;
-    use persistence::Env;
-    use std::sync::Arc;
+    use credentials::credential_services::{CredentialService, CredentialServiceInterface};
+    use crypto::{Crypto, Encrypt};
+    use mail::{Mail, SendEmail};
     use persistence::env::myenv::EnvInterface;
+    use persistence::{DatabaseInterface, Env};
+    use std::sync::Arc;
     use usecases::utils::setup_db;
     use usecases::{RegisterRequest, RegisterUseCase, RegisterUseCaseInterface};
     use users::user::User;
@@ -14,19 +14,21 @@ mod tests {
     #[tokio::test]
     async fn test_register_usecase() {
         dotenv::dotenv().ok();
-        let env: &'static Env = Box::leak(Box::new(Env::new()));
-        let env1: dyn EnvInterface  = Env::new();
+        // let env: &'static Env = Box::leak(Box::new(Env::new()));
+        let env: Arc<dyn EnvInterface> = Arc::new(Env::new());
         let db = setup_db().await;
-        let mail = Mail::new_arc(Arc::new(env));
-        let user_service = Arc::new(UserService::new(Arc::clone(&db)));
-        let credential_service = Arc::new(CredentialService::new(Arc::clone(&db)));
-        let encrypt = Crypto::new_arc(&env);
+        let mail: Arc<dyn SendEmail> = Mail::new_arc(Arc::clone(&env));
+        let user_service: Arc<dyn UserServiceInterface> =
+            Arc::new(UserService::new(Arc::clone(&db)));
+        let credential_service: Arc<dyn CredentialServiceInterface> =
+            Arc::new(CredentialService::new(Arc::clone(&db)));
+        let encrypt: Arc<dyn Encrypt> = Crypto::new_arc(env.clone());
 
         let register_usecase = RegisterUseCase::new(
             Arc::clone(&user_service),
             Arc::clone(&credential_service),
             Arc::clone(&mail),
-            Arc::clone(env),
+            Arc::clone(&env),
             Arc::clone(&encrypt),
         );
 
@@ -45,17 +47,18 @@ mod tests {
     #[tokio::test]
     async fn test_activate_user() {
         dotenv::dotenv().ok();
-        let env: &'static Env = Box::leak(Box::new(Env::new()));
-        let db = setup_db().await;
-        let mail = Mail::new_arc(&env);
-        let user_service = Arc::new(UserService::new(Arc::clone(&db)));
-        let credential_service = Arc::new(CredentialService::new(Arc::clone(&db)));
-        let encrypt = Crypto::new_arc(&env);
+        let env: Arc<dyn EnvInterface> = Arc::new(Env::new()); // let env: &'static Env = Arc::new(Env::new());
+        let db: Arc<dyn DatabaseInterface> = setup_db().await;
+        let mail: Arc<dyn SendEmail> = Mail::new_arc(env.clone());
+        let user_service: Arc<dyn UserServiceInterface> = Arc::new(UserService::new(db.clone()));
+        let credential_service: Arc<dyn CredentialServiceInterface> =
+            Arc::new(CredentialService::new(Arc::clone(&db)));
+        let encrypt: Arc<dyn Encrypt> = Crypto::new_arc(env.clone());
         let register_usecase = RegisterUseCase::new(
             Arc::clone(&user_service),
             Arc::clone(&credential_service),
             Arc::clone(&mail),
-            Arc::clone(env),
+            Arc::clone(&env),
             Arc::clone(&encrypt),
         );
 

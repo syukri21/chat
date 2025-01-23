@@ -81,9 +81,9 @@ impl RegisterUseCase {
     pub fn new(
         user_service: Arc<dyn UserServiceInterface>,
         credential_service: Arc<dyn CredentialServiceInterface>,
-        mail: Arc<dyn SendEmail + Send + Sync>,
+        mail: Arc<dyn SendEmail>,
         env: Arc<dyn EnvInterface>,
-        encrypt: Arc<dyn Encrypt + Send + Sync>,
+        encrypt: Arc<dyn Encrypt>,
     ) -> Self {
         Self {
             user_service,
