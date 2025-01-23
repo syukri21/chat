@@ -8,15 +8,26 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  DATABASE_URL: ${{ vars.DATABASE_URL || 'sqlite::memory:' }}
+  EMAIL_FROM: ${{ vars.EMAIL_FROM }}
+  EMAIL_FROM_EMAIL: ${{ vars.EMAIL_FROM_EMAIL }}
+  EMAIL_SMTP_USERNAME: ${{ vars.EMAIL_SMTP_USERNAME }}
+  EMAIL_SMTP_PASSWORD: ${{ secrets.EMAIL_SMTP_PASSWORD }}
+  EMAIL_SMTP_HOST: ${{ vars.EMAIL_SMTP_HOST }}
+  EMAIL_SMTP_PORT: ${{ vars.EMAIL_SMTP_PORT }}
+  APP_KEY_MAIN: ${{ secrets.APP_KEY_MAIN }}
+  APP_CALLBACK_URL: ${{ vars.APP_CALLBACK_URL || 'http://localhost:3000/callback' }}
+  APP_KEY_JWT: ${{ secrets.APP_KEY_JWT }}
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
     - name: Build
+      env:
+        RUSTFLAGS: ${{ vars.RUSTFLAGS || '-D warnings' }}
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
