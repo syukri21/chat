@@ -3,6 +3,8 @@ use mail_send::SmtpClientBuilder;
 use persistence::env::myenv::EnvInterface;
 use shaku::{Component, Interface};
 use std::sync::Arc;
+use tracing::log::info;
+use tracing::{ Span};
 
 #[derive(Component)]
 #[shaku(interface = SendEmail)]
@@ -42,28 +44,64 @@ impl SendEmail for Mail {
         body: &str,
     ) -> anyhow::Result<()> {
         // Build a simple multipart message
-        let message = MessageBuilder::new()
-            .from((self.env.get_email_from(), self.env.get_email_from_email()))
-            .to(vec![(to, to_email)])
-            .subject(subject)
-            .html_body(body)
-            .text_body(body);
+        let port = self
+            .env
+            .get_email_smtp_port()
+            .parse()
+            .expect("invalid port");
 
-        // Connect to the SMTP submissions port, upgrade to TLS and
-        // authenticate using the provided credentials.
-        SmtpClientBuilder::new(
-            self.env.get_email_smtp_host(),
-            self.env.get_email_smtp_port().parse()?,
-        )
-        .implicit_tls(false)
-        .credentials((
-            self.env.get_email_smtp_username(),
-            self.env.get_email_smtp_password(),
-        ))
-        .connect()
-        .await?
-        .send(message)
-        .await?;
+        let host = self.env.get_email_smtp_host();
+
+        info!("Sending email to {}...", to);
+        let span = Span::current();
+
+        tracing::info!("Initializing email...");
+        tokio::spawn({
+            let host = host.to_string();
+            let port = port; // Assuming `port` is already a copyable type like `u16`
+            let smtp_username = self.env.get_email_smtp_username().to_string();
+            let smtp_password = self.env.get_email_smtp_password().to_string();
+            let subject = subject.to_string(); // Clone the message if it's not `Copy`
+            let body = body.to_string();
+
+            let email_from = self.env.get_email_from().to_string();
+            let email_from_email = self.env.get_email_from_email().to_string();
+            let to = to.to_string();
+            let to_email = to_email.to_string();
+
+            async move {
+                let _enter = span.enter();
+                tracing::info!("Sending email...");
+
+                // Connect to the SMTP server and authenticate
+                let message = MessageBuilder::new()
+                    .from((email_from, email_from_email))
+                    .to(vec![(to, to_email)])
+                    .subject(subject)
+                    .html_body(body.clone())
+                    .text_body(body);
+
+                match SmtpClientBuilder::new(host, port)
+                    .implicit_tls(false)
+                    .credentials((smtp_username, smtp_password))
+                    .connect()
+                    .await
+                {
+                    Ok(mut client) => {
+                        let _enter = span.enter();
+                        if let Err(e) = client.send(message).await {
+                            tracing::error!("Error sending email {}", e);
+                        } else {
+                            tracing::info!("Email sent successfully");
+                        }
+                    }
+                    Err(e) => {
+                        let _enter = span.enter();
+                        tracing::error!("Error connecting to SMTP server: {}", e);
+                    }
+                }
+            }
+        });
 
         Ok(())
     }
@@ -71,11 +109,11 @@ impl SendEmail for Mail {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
     use crate::Mail;
     use crate::SendEmail;
-    use persistence::Env;
     use persistence::env::myenv::EnvInterface;
+    use persistence::Env;
+    use std::sync::Arc;
 
     #[tokio::test]
     async fn test_send_email() {
@@ -95,6 +133,6 @@ mod tests {
         let result = mail
             .send_email("test", "syukrihsb148@gmail.com", "test", "test")
             .await;
-        assert!(!result.is_ok());
+        assert!(result.is_ok());
     }
 }

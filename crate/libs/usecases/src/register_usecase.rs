@@ -101,11 +101,11 @@ pub trait RegisterUseCaseInterface: Interface {
         -> anyhow::Result<RegisterResponse>;
     async fn activate_user<'a>(&self, encrypted_user_id: &'a str) -> anyhow::Result<()>;
 
-    async fn send_activation_email<'a>(
+    async fn send_activation_email(
         &self,
-        user_id: &'a str,
-        username: &'a str,
-        email: &'a str,
+        user_id: String,
+        username: String,
+        email: String,
     ) -> anyhow::Result<()>;
 }
 
@@ -125,7 +125,7 @@ impl RegisterUseCaseInterface for RegisterUseCase {
             .create_credential(&credential)
             .await?;
 
-        self.send_activation_email(&user.id.to_string(), &user.username, &user.email)
+        self.send_activation_email(user.id.to_string(), user.username, user.email)
             .await?;
 
         Ok(RegisterResponse {})
@@ -137,13 +137,13 @@ impl RegisterUseCaseInterface for RegisterUseCase {
         Ok(())
     }
 
-    async fn send_activation_email<'a>(
+    async fn send_activation_email(
         &self,
-        user_id: &'a str,
-        username: &'a str,
-        email: &'a str,
+        user_id: String,
+        username: String,
+        email: String,
     ) -> anyhow::Result<()> {
-        let encrypted_user_id = self.crypto.encrypt(user_id).await?;
+        let encrypted_user_id = self.crypto.encrypt(user_id.as_str()).await?;
 
         let button = format!(
             r#"<a href="{}/activate/{}">Activate account</a>"#,
@@ -159,7 +159,12 @@ impl RegisterUseCaseInterface for RegisterUseCase {
             button
         );
         self.mail
-            .send_email(username, email, "Registration successful", &message)
+            .send_email(
+                username.as_str(),
+                email.as_str(),
+                "Registration successful",
+                &message,
+            )
             .await?;
         Ok(())
     }

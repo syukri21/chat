@@ -1574,6 +1574,7 @@ dependencies = [
  "persistence",
  "shaku",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -3308,6 +3309,7 @@ dependencies = [
  "shaku",
  "sqlx",
  "tokio",
+ "tracing",
  "users",
  "uuid",
 ]
