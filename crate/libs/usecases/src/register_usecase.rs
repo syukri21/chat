@@ -60,7 +60,9 @@ impl RegisterRequest<'_> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RegisterResponse {}
+pub struct RegisterResponse {
+    pub encrypted_user_id: String,
+}
 
 #[derive(Component)]
 #[shaku(interface = RegisterUseCaseInterface)]
@@ -131,10 +133,11 @@ impl RegisterUseCaseInterface for RegisterUseCase {
             .create_credential(&credential)
             .await?;
 
-        self.send_activation_email(user.id.to_string(), user.username, user.email)
+        let encrypted_user_id = self.crypto.encrypt(user.id.to_string().as_str()).await?;
+        self.send_activation_email(encrypted_user_id.clone(), user.username, user.email)
             .await?;
 
-        Ok(RegisterResponse {})
+        Ok(RegisterResponse { encrypted_user_id })
     }
 
     async fn activate_user<'a>(&self, encrypted_user_id: &'a str) -> anyhow::Result<()> {
@@ -145,12 +148,10 @@ impl RegisterUseCaseInterface for RegisterUseCase {
 
     async fn send_activation_email(
         &self,
-        user_id: String,
+        encrypted_user_id: String,
         username: String,
         email: String,
     ) -> anyhow::Result<()> {
-        let encrypted_user_id = self.crypto.encrypt(user_id.as_str()).await?;
-
         let button = format!(
             r#"<a href="{}/activate/{}">Activate account</a>"#,
             self.env.get_app_callback_url(),

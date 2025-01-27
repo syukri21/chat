@@ -4,7 +4,7 @@ const USERNAME = `testuser`;
 const PASSWORD = 'password123';
 
 const EMAIL_2 = 'syukrihsbofficial@gmail.com'
-const USERNAME_2 = 'syukrihsbofficial@gmail.com'
+const USERNAME_2 = 'testuser2'
 
 
 export {

@@ -1,7 +1,7 @@
 use crate::utils::render_error_alert;
 use axum::extract::State;
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Redirect, Response};
+use axum::http::{HeaderMap, StatusCode};
+use axum::response::{IntoResponse, Response};
 use axum::Form;
 use commons::generic_errors::GenericError;
 use serde::Deserialize;
@@ -36,7 +36,10 @@ pub async fn login(
         Ok(response) => {
             trace!("login response: {:?}", response);
             info!("Login successful");
-            Redirect::to("/").into_response()
+
+            let mut headers = HeaderMap::new();
+            headers.insert("hx-redirect", "/".parse().unwrap());
+            (headers, "It works!").into_response()
         }
         Err(e) => {
             error!("Error occurred during login: {}", e);

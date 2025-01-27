@@ -14,7 +14,7 @@ shaku.workspace = true
 anyhow.workspace = true
 
 axum = {version = "0.8.1", features = ["ws"]}
-tower-http = { version = "0.6.1", features = ["trace", "fs"] }
+tower-http = { version = "0.6.1", features = ["trace", "fs", "add-extension"] }
 
 usecases = { path = "../../libs/usecases" }
 persistence = { path = "../../libs/persistence" }

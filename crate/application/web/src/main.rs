@@ -13,10 +13,14 @@ use jwt::JWT;
 use mail::Mail;
 use persistence::{DatabaseInterface, Env, DB};
 use shaku::{module, HasComponent};
+use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::signal;
+use tokio::sync::RwLock;
+use tower_http::add_extension::AddExtensionLayer;
 use tower_http::classify::ServerErrorsFailureClass;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
@@ -26,6 +30,7 @@ use usecases::{InvitePrivateChatUsecase, LoginUseCase, RegisterUseCase};
 use users::user_services::UserService;
 
 // Add this near the top with other modules
+mod debug_handlers;
 mod htmx_handlers;
 mod page_handler;
 mod utils;
@@ -37,6 +42,13 @@ module! {
     }
 }
 
+#[derive(Default, Debug)]
+pub struct DebugState {
+    pub token: HashMap<String, String>,
+}
+
+type SharedDebugState = Arc<RwLock<DebugState>>;
+
 #[tokio::main]
 async fn main() {
     // initialize tracing
@@ -45,6 +57,10 @@ async fn main() {
     let module = usecases::utils::setup_module::<WebModule>(WebModule::builder()).await;
     let db: &dyn DatabaseInterface = module.resolve_ref();
     db.migrate().await;
+
+    let debug_state = Arc::new(RwLock::new(DebugState {
+        token: HashMap::new(),
+    }));
 
     // build our application with a route
     // In main function
@@ -61,12 +77,16 @@ async fn main() {
         get(callback_activate).with_state(module.resolve()),
     );
 
+    let debug_app = Router::new().route("/active-link", get(debug_handlers::get_activate_link));
+
     let app = Router::new()
         .route("/", get(home))
         .route("/login", get(login))
         .route("/signup", get(signup))
         .nest("/htmx", htmx_app)
-        .nest("/callback", callback_app);
+        .nest("/callback", callback_app)
+        .nest("/debug", debug_app)
+        .layer(AddExtensionLayer::new(debug_state));
 
     let app = with_assets(app);
     let app = with_tracing(app);

@@ -1,11 +1,12 @@
 use crate::utils::render_error_alert;
+use crate::{ SharedDebugState};
 use axum::extract::State;
-use axum::http::StatusCode;
+use axum::http::{ StatusCode};
 use axum::response::{Html, IntoResponse, Response};
-use axum::Form;
+use axum::{Extension, Form};
 use commons::generic_errors::GenericError;
 use serde::Deserialize;
-use std::sync::Arc;
+use std::sync::{Arc};
 use tracing::log::info;
 use usecases::{RegisterRequest, RegisterUseCaseInterface};
 
@@ -31,14 +32,23 @@ impl RegisterForm {
 }
 
 pub async fn register(
+    Extension(debug_state): Extension<SharedDebugState>,
     State(register_usecase): State<Arc<dyn RegisterUseCaseInterface>>,
     Form(form): Form<RegisterForm>,
 ) -> impl IntoResponse {
     tracing::info!("Htmx register Started with username: {}", form.username);
 
     match register_usecase.register(&form.to_register_request()).await {
-        Ok(_) => {
+        Ok(response) => {
             info!("Registration successful");
+
+            {
+                let mut debug_state = debug_state.write().await;
+                debug_state
+                    .token
+                    .insert(form.username.clone(), response.encrypted_user_id.clone());
+            }
+
             Html(
                 include_str!("../../page/htmx/signup_success.html")
                     .parse::<String>()
