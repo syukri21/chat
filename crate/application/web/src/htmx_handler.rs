@@ -5,6 +5,7 @@ use axum::Form;
 use commons::generic_errors::GenericError;
 use serde::Deserialize;
 use std::sync::Arc;
+use tracing::log::info;
 use usecases::{RegisterRequest, RegisterUseCaseInterface};
 
 #[derive(Deserialize)]
@@ -44,7 +45,7 @@ pub async fn register(
 
     match register_usecase.register(&form.to_register_request()).await {
         Ok(_) => {
-            tracing::info!("Registration successful");
+            info!("Registration successful");
             Html(
                 include_str!("../page/htmx/signup_success.html")
                     .parse::<String>()

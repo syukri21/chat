@@ -1,7 +1,8 @@
+use crate::page_handler::{callback_activate, home, login, signup};
 use axum::body::Bytes;
 use axum::extract::MatchedPath;
 use axum::http::{HeaderMap, Request};
-use axum::response::{Html, Response};
+use axum::response::Response;
 use axum::routing::{get, post};
 use axum::Router;
 use chats::chat_services::ChatService;
@@ -20,11 +21,12 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use usecases::{utils, InvitePrivateChatUsecase, RegisterUseCase };
+use usecases::{utils, InvitePrivateChatUsecase, RegisterUseCase};
 use users::user_services::UserService;
 
 // Add this near the top with other modules
 mod htmx_handler;
+mod page_handler;
 
 module! {
      WebModule {
@@ -48,11 +50,19 @@ async fn main() {
         "/register",
         post(htmx_handler::register).with_state(module.resolve()),
     );
+
+    // This is callback nest routes
+    let callback_app = Router::new().route(
+        "/activate/{token}",
+        get(callback_activate).with_state(module.resolve()),
+    );
+
     let app = Router::new()
         .route("/", get(home))
         .route("/login", get(login))
         .route("/signup", get(signup))
-        .nest("/htmx", htmx_app);
+        .nest("/htmx", htmx_app)
+        .nest("/callback", callback_app);
 
     let app = with_assets(app);
     let app = with_tracing(app);
@@ -164,13 +174,3 @@ async fn shutdown_signal() {
         _ = terminate => {},
     }
 }
-async fn home() -> Html<&'static str> {
-    Html(include_str!("../page/chat.html"))
-}
-async fn login() -> Html<&'static str> {
-    Html(include_str!("../page/login.html"))
-}
-async fn signup() -> Html<&'static str> {
-    Html(include_str!("../page/signup.html"))
-}
-// Remove the htmx_register function as it's now in htmx_handler.rs
