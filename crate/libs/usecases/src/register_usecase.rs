@@ -118,7 +118,13 @@ impl RegisterUseCaseInterface for RegisterUseCase {
         request.validate().await?;
 
         let user = request.to_user().await?;
-        self.user_service.create_user(&user).await?;
+        self.user_service.create_user(&user).await.map_err(|e| {
+            if e.to_string().contains("UNIQUE constraint failed") {
+                GenericError::user_already_exists()
+            } else {
+                GenericError::unknown(e)
+            }
+        })?;
 
         let credential = Credential::new(user.id, request.private_key, request.public_key);
         self.credential_service

@@ -26,6 +26,16 @@ pub enum GenericError {
 
     #[error("User not found")]
     UserNotFound(),
+
+    #[error("User already exists")]
+    UserAlreadyExists(),
+}
+
+impl GenericError {
+    pub fn user_already_exists() -> anyhow::Error {
+        error!("user already exists");
+        GenericError::UserAlreadyExists().into()
+    }
 }
 
 impl GenericError {
