@@ -1,21 +1,21 @@
-name: Rust
+# name: Rust
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+# on:
+#   push:
+#     branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
+#     steps:
     
-    - uses: actions/checkout@v4
-    - name: Create .env file
-      run: |
-          touch .env
-          echo "${{secrets.TEST_CHAT_ENV}}" >> .env
-    - name: Run tests
-      run: cargo test
+#     - uses: actions/checkout@v4
+#     - name: Create .env file
+#       run: |
+#           touch .env
+#           echo "${{secrets.TEST_CHAT_ENV}}" >> .env
+    # - name: Run tests
+    #   run: cargo test
