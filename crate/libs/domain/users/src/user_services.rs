@@ -88,7 +88,7 @@ impl UserServiceInterface for UserService {
 
         Self::row_to_user(row)
     }
-    async fn get_user_by_username(&self, username: &str) -> anyhow::Result<User> {
+    async fn get_user_by_username(&self, username_or_email: &str) -> anyhow::Result<User> {
         let mut connection = self.db.get_pool().acquire().await?;
         let query = r#"SELECT
             id,
@@ -100,9 +100,10 @@ impl UserServiceInterface for UserService {
             updated_at,
             deleted_at
             FROM users
-            WHERE username = ?"#;
+            WHERE is_active = true and (username = ? or email = ?)"#;
         let row = sqlx::query(query)
-            .bind(username.to_string())
+            .bind(username_or_email.to_string())
+            .bind(username_or_email.to_string())
             .fetch_one(&mut *connection)
             .await?;
 

@@ -25,3 +25,4 @@ commons = { path = "../../libs/commons" }
 mail = { path = "../../libs/clients/mail" }
 crypto = { path = "../../libs/clients/crypto" }
 jwt = { path = "../../libs/clients/jwt" }
+log = "0.4.22"

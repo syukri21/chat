@@ -1,3 +1,4 @@
+use crate::utils::render_error_alert;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
@@ -28,14 +29,6 @@ impl RegisterForm {
         }
     }
 }
-fn render_error_alert(message: String) -> String {
-    format!(
-        r#"<div class="mb-4 p-4 text-red-700 text-sm bg-red-100 rounded-lg" role="alert">
-            <p class="text-center">{}</p>
-        </div>"#,
-        message,
-    )
-}
 
 pub async fn register(
     State(register_usecase): State<Arc<dyn RegisterUseCaseInterface>>,
@@ -47,7 +40,7 @@ pub async fn register(
         Ok(_) => {
             info!("Registration successful");
             Html(
-                include_str!("../page/htmx/signup_success.html")
+                include_str!("../../page/htmx/signup_success.html")
                     .parse::<String>()
                     .unwrap(),
             )

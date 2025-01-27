@@ -1,3 +1,4 @@
+use crate::htmx_handlers::{login, register};
 use crate::page_handler::{callback_activate, home, login, signup};
 use axum::body::Bytes;
 use axum::extract::MatchedPath;
@@ -21,16 +22,17 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use usecases::{utils, InvitePrivateChatUsecase, RegisterUseCase};
+use usecases::{InvitePrivateChatUsecase, LoginUseCase, RegisterUseCase};
 use users::user_services::UserService;
 
 // Add this near the top with other modules
-mod htmx_handler;
+mod htmx_handlers;
 mod page_handler;
+mod utils;
 
 module! {
      WebModule {
-        components = [InvitePrivateChatUsecase, RegisterUseCase, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto ],
+        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto ],
         providers = []
     }
 }
@@ -40,16 +42,18 @@ async fn main() {
     // initialize tracing
     tracing_init();
 
-    let module = utils::setup_module::<WebModule>(WebModule::builder()).await;
+    let module = usecases::utils::setup_module::<WebModule>(WebModule::builder()).await;
     let db: &dyn DatabaseInterface = module.resolve_ref();
     db.migrate().await;
 
     // build our application with a route
     // In main function
-    let htmx_app = Router::new().route(
-        "/register",
-        post(htmx_handler::register).with_state(module.resolve()),
-    );
+    let htmx_app = Router::new()
+        .route(
+            "/register",
+            post(register::register).with_state(module.resolve()),
+        )
+        .route("/login", post(login::login).with_state(module.resolve()));
 
     // This is callback nest routes
     let callback_app = Router::new().route(
@@ -91,7 +95,7 @@ fn tracing_init() {
                 // axum logs rejections from built-in extractors with the `axum::rejection`
                 // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
                 format!(
-                    "{}=debug,tower_http=debug,axum::rejection=trace,mail=debug",
+                    "{}=debug,tower_http=debug,axum::rejection=trace,mail=debug,commons=debug",
                     env!("CARGO_CRATE_NAME")
                 )
                 .into()
