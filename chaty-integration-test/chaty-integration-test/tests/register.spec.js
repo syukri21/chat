@@ -1,9 +1,9 @@
 // @ts-check
 import {test, expect} from '@playwright/test';
+import {BASE_URL, EMAIl, EMAIL_2, PASSWORD, USERNAME} from "../commons/constant";
 
 test.describe('Registration Flow', () => {
 
-    const BASE_URL = 'http://localhost:3000';
 
     test.beforeEach(async ({page}) => {
         await page.goto(`${BASE_URL}/signup`);
@@ -30,17 +30,13 @@ test.describe('Registration Flow', () => {
 
     test.describe.serial(() => {
 
-        const email = 'syukrihsb148@gmail.com'
-        const EMAIL_2 = 'syukrihsbofficial@gmail.com'
-        const username = `testuser`;
-        const password = 'password123';
 
         test('should successfully register a new user', async ({page}) => {
 
-            await page.getByLabel('Username').fill(username);
-            await page.getByLabel('Email').fill(email);
-            await page.getByLabel('Password', {exact: true}).fill(password);
-            await page.getByLabel('Confirm Password', {exact: true}).fill(password);
+            await page.getByLabel('Username').fill(USERNAME);
+            await page.getByLabel('Email').fill(EMAIl);
+            await page.getByLabel('Password', {exact: true}).fill(PASSWORD);
+            await page.getByLabel('Confirm Password', {exact: true}).fill(PASSWORD);
             await page.getByRole('button', {name: 'Register'}).click();
 
             // Verify successful registration
@@ -51,10 +47,10 @@ test.describe('Registration Flow', () => {
         test('should show error for duplicate username', async ({page}) => {
 
             // Try to register with same username
-            await page.getByLabel('Username').fill(username);
+            await page.getByLabel('Username').fill(USERNAME);
             await page.getByLabel('Email').fill(EMAIL_2);
-            await page.getByLabel('Password', {exact: true}).fill(password);
-            await page.getByLabel('Confirm Password', {exact: true}).fill(password);
+            await page.getByLabel('Password', {exact: true}).fill(PASSWORD);
+            await page.getByLabel('Confirm Password', {exact: true}).fill(PASSWORD);
             await page.getByRole('button', {name: 'Register'}).click();
 
             await expect(page.getByText('User already exists')).toBeVisible();
