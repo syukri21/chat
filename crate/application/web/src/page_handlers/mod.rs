@@ -1,8 +1,9 @@
-use axum::extract::{Path, State};
+use crate::WebModule;
+use axum::extract::{Path };
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
 use commons::generic_errors::GenericError;
-use std::sync::Arc;
+use shaku_axum::Inject;
 use tracing::log::info;
 use usecases::RegisterUseCaseInterface;
 
@@ -16,7 +17,7 @@ pub async fn signup() -> Html<&'static str> {
     Html(include_str!("../../page/signup.html"))
 }
 pub async fn callback_activate(
-    State(register_usecase): State<Arc<dyn RegisterUseCaseInterface>>,
+    register_usecase: Inject<WebModule, dyn RegisterUseCaseInterface>,
     Path(token): Path<String>,
 ) -> impl IntoResponse {
     info!("Activating user");

@@ -30,10 +30,7 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{debug, info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use usecases::{
-    InvitePrivateChatUsecase, LoginUseCase, LoginUseCaseInterface, RegisterUseCase,
-    RegisterUseCaseInterface,
-};
+use usecases::{InvitePrivateChatUsecase, LoginUseCase, LoginUseCaseInterface, RegisterUseCase};
 use users::user_services::UserService;
 
 // Add this near the top with other modules
@@ -65,10 +62,8 @@ async fn main() {
     let module = usecases::utils::setup_module::<WebModule>(WebModule::builder()).await;
     let db: &dyn DatabaseInterface = module.resolve_ref();
     db.migrate().await;
-
-    let register_usecase: Arc<dyn RegisterUseCaseInterface> = module.resolve();
     let login_usecase: Arc<dyn LoginUseCaseInterface> = module.resolve();
-
+    let arc_module = Arc::new(module);
     let debug_state = Arc::new(RwLock::new(DebugState {
         token: HashMap::new(),
     }));
@@ -76,20 +71,12 @@ async fn main() {
     // build our application with a route
     // In main function
     let htmx_app = Router::new()
-        .route(
-            "/register",
-            post(register::register).with_state(register_usecase.clone()),
-        )
-        .route(
-            "/login",
-            post(login::login).with_state(login_usecase.clone()),
-        );
+        .route("/register", post(register::register))
+        .route("/login", post(login::login));
 
     // This is callback nest routes
-    let callback_app = Router::new().route(
-        "/activate/{token}",
-        get(page_handlers::callback_activate).with_state(register_usecase.clone()),
-    );
+    let callback_app =
+        Router::new().route("/activate/{token}", get(page_handlers::callback_activate));
 
     let debug_app = Router::new().route("/active-link", get(debug_handlers::get_activate_link));
 
@@ -101,7 +88,8 @@ async fn main() {
         .nest("/callback", callback_app)
         .nest("/debug", debug_app)
         .layer(AddExtensionLayer::new(debug_state))
-        .route_layer(middleware::from_fn_with_state(login_usecase.clone(), auth));
+        .route_layer(middleware::from_fn_with_state(login_usecase.clone(), auth))
+        .with_state(arc_module);
 
     let app = with_assets(app);
     let app = with_tracing(app);

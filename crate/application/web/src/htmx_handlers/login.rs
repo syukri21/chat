@@ -1,12 +1,12 @@
 use crate::utils::render_error_alert;
-use axum::extract::State;
+use crate::WebModule;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Form;
 use commons::generic_errors::GenericError;
 use http::header::SET_COOKIE;
 use serde::Deserialize;
-use std::sync::Arc;
+use shaku_axum::Inject;
 use tracing::log::{error, info};
 use usecases::{LoginRequest, LoginUseCaseInterface};
 
@@ -26,7 +26,7 @@ impl LoginForm {
 }
 
 pub async fn login(
-    State(login_usecase): State<Arc<dyn LoginUseCaseInterface>>,
+    login_usecase: Inject<WebModule, dyn LoginUseCaseInterface>,
     Form(form): Form<LoginForm>,
 ) -> impl IntoResponse {
     info!(

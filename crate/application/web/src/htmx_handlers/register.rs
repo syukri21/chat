@@ -1,12 +1,11 @@
 use crate::utils::render_error_alert;
-use crate::{ SharedDebugState};
-use axum::extract::State;
-use axum::http::{ StatusCode};
+use crate::{SharedDebugState, WebModule};
+use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
 use axum::{Extension, Form};
 use commons::generic_errors::GenericError;
 use serde::Deserialize;
-use std::sync::{Arc};
+use shaku_axum::Inject;
 use tracing::log::info;
 use usecases::{RegisterRequest, RegisterUseCaseInterface};
 
@@ -33,7 +32,7 @@ impl RegisterForm {
 
 pub async fn register(
     Extension(debug_state): Extension<SharedDebugState>,
-    State(register_usecase): State<Arc<dyn RegisterUseCaseInterface>>,
+    register_usecase: Inject<WebModule, dyn RegisterUseCaseInterface>,
     Form(form): Form<RegisterForm>,
 ) -> impl IntoResponse {
     tracing::info!("Htmx register Started with username: {}", form.username);
