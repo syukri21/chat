@@ -13,7 +13,9 @@ serde.workspace = true
 shaku.workspace = true
 anyhow.workspace = true
 
-axum = {version = "0.8.1", features = ["ws"]}
+axum = { version = "0.8.1", features = ["ws"] }
+axum-extra = { version = "0.10.0", features = ["typed-header", "cookie"] }
+
 tower-http = { version = "0.6.1", features = ["trace", "fs", "add-extension"] }
 
 usecases = { path = "../../libs/usecases" }
@@ -26,3 +28,4 @@ mail = { path = "../../libs/clients/mail" }
 crypto = { path = "../../libs/clients/crypto" }
 jwt = { path = "../../libs/clients/jwt" }
 log = "0.4.22"
+http = "1.2.0"

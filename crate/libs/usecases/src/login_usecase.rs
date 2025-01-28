@@ -1,6 +1,7 @@
 use commons::generic_errors::GenericError;
 use credentials::credential_services::CredentialServiceInterface;
 use jwt::{AccessClaims, JWTInterface, Role};
+use log::error;
 use shaku::{Component, Interface};
 use sqlx::Error;
 use std::sync::Arc;
@@ -51,6 +52,7 @@ pub struct LoginResponse {
 #[async_trait::async_trait]
 pub trait LoginUseCaseInterface: Interface {
     async fn login(&self, request: LoginRequest<'_>) -> anyhow::Result<LoginResponse>;
+    async fn authorize_current_user(&self, token: &str) -> anyhow::Result<AccessClaims>;
 }
 
 #[async_trait::async_trait]
@@ -88,6 +90,13 @@ impl LoginUseCaseInterface for LoginUseCase {
                 private_key: credential.private_key,
                 public_key: credential.public_key,
             })
+    }
+
+    async fn authorize_current_user(&self, token: &str) -> anyhow::Result<AccessClaims> {
+        self.jwt_service.verify_token(token).await.map_err(|e| {
+            error!("Error when verifying token: {}", e);
+            e
+        })
     }
 }
 #[cfg(test)]

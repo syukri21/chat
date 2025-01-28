@@ -33,6 +33,7 @@ test.describe('Login Flow', () => {
             await page.getByLabel('Password', {exact: true}).fill(password);
             await page.getByLabel('Confirm Password', {exact: true}).fill(password);
             await page.getByRole('button', {name: 'Register'}).click();
+            await page.waitForTimeout(3000)
 
             await page.goto(`${BASE_URL}/login`);
             await page.waitForTimeout(1000)
@@ -63,7 +64,6 @@ test.describe('Login Flow', () => {
             }
 
             await page.goto(`${BASE_URL}/login`);
-            await page.waitForTimeout(1000)
             await page.waitForTimeout(1000);
             await page.getByLabel('Username').fill(username);
             await page.getByLabel('Password').fill(password);

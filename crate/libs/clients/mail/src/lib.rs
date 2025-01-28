@@ -3,8 +3,7 @@ use mail_send::SmtpClientBuilder;
 use persistence::env::myenv::EnvInterface;
 use shaku::{Component, Interface};
 use std::sync::Arc;
-use tracing::log::info;
-use tracing::{ Span};
+use tracing::log::{error, info};
 
 #[derive(Component)]
 #[shaku(interface = SendEmail)]
@@ -53,8 +52,6 @@ impl SendEmail for Mail {
         let host = self.env.get_email_smtp_host();
 
         info!("Sending email to {}...", to);
-        let span = Span::current();
-
         tracing::info!("Initializing email...");
         tokio::spawn({
             let host = host.to_string();
@@ -70,8 +67,7 @@ impl SendEmail for Mail {
             let to_email = to_email.to_string();
 
             async move {
-                let _enter = span.enter();
-                tracing::info!("Sending email...");
+                info!("Sending email...");
 
                 // Connect to the SMTP server and authenticate
                 let message = MessageBuilder::new()
@@ -88,16 +84,14 @@ impl SendEmail for Mail {
                     .await
                 {
                     Ok(mut client) => {
-                        let _enter = span.enter();
                         if let Err(e) = client.send(message).await {
-                            tracing::error!("Error sending email {}", e);
+                            error!("Error sending email {}", e);
                         } else {
-                            tracing::info!("Email sent successfully");
+                            info!("Email sent successfully");
                         }
                     }
                     Err(e) => {
-                        let _enter = span.enter();
-                        tracing::error!("Error connecting to SMTP server: {}", e);
+                        error!("Error connecting to SMTP server: {}", e);
                     }
                 }
             }

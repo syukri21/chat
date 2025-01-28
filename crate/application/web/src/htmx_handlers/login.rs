@@ -4,9 +4,10 @@ use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Form;
 use commons::generic_errors::GenericError;
+use http::header::SET_COOKIE;
 use serde::Deserialize;
 use std::sync::Arc;
-use tracing::log::{error, info, trace};
+use tracing::log::{error, info};
 use usecases::{LoginRequest, LoginUseCaseInterface};
 
 #[derive(Deserialize)]
@@ -34,12 +35,16 @@ pub async fn login(
     );
     match login_usecase.login(form.to_login_request()).await {
         Ok(response) => {
-            trace!("login response: {:?}", response);
             info!("Login successful");
-
             let mut headers = HeaderMap::new();
+            // set cookie
+            let cookie = format!("token={}; httpOnly; path=/", response.token)
+                .parse()
+                .unwrap();
+            headers.insert(SET_COOKIE, cookie);
             headers.insert("hx-redirect", "/".parse().unwrap());
-            (headers, "It works!").into_response()
+
+            (headers, "").into_response()
         }
         Err(e) => {
             error!("Error occurred during login: {}", e);
