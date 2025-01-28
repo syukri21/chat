@@ -13,7 +13,7 @@ use credentials::credential_services::CredentialService;
 use crypto::Crypto;
 use http::StatusCode;
 use jwt::JWT;
-use log::{error, trace};
+use log::{error, info, trace};
 use mail::Mail;
 use persistence::{DatabaseInterface, Env, DB};
 use shaku::{module, HasComponent};
@@ -165,12 +165,10 @@ fn with_tracing(app: Router) -> Router {
                 )
             })
             .on_request(|_request: &Request<_>, _span: &Span| {
-                // You can use `_span.record("some_other_field", value)` in one of these
-                // closures to attach a value to the initially empty field in the info_span
-                // created above.
+                info!("request");
             })
-            .on_response(|_response: &Response, _latency: Duration, _span: &Span| {
-                // ...
+            .on_response(|_response: &Response, latency: Duration, _span: &Span| {
+                info!("response completed in {:?}", latency);
             })
             .on_body_chunk(|_chunk: &Bytes, _latency: Duration, _span: &Span| {
                 // ...
