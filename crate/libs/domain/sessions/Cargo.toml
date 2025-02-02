@@ -1,0 +1,16 @@
+[package]
+name = "sessions"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+async-trait.workspace = true
+shaku.workspace = true
+
+persistence = { path = "../../persistence" }
+log = "0.4.22"

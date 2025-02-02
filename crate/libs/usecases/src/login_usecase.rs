@@ -2,6 +2,8 @@ use commons::generic_errors::GenericError;
 use credentials::credential_services::CredentialServiceInterface;
 use jwt::{AccessClaims, JWTInterface, Role};
 use log::error;
+use sessions::entity::Session;
+use sessions::services::SessionServiceInterface;
 use shaku::{Component, Interface};
 use sqlx::Error;
 use std::sync::Arc;
@@ -16,12 +18,16 @@ pub struct LoginUseCase {
     jwt_service: Arc<dyn JWTInterface>,
     #[shaku(inject)]
     credential_service: Arc<dyn CredentialServiceInterface>,
+    #[shaku(inject)]
+    session_service: Arc<dyn SessionServiceInterface>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoginRequest<'a> {
     pub username: &'a str,
     pub password: &'a str,
+    pub user_agent: &'a str,
+    pub ip_address: &'a str,
 }
 
 impl LoginRequest<'_> {
@@ -81,6 +87,16 @@ impl LoginUseCaseInterface for LoginUseCase {
             .map_err(|e| GenericError::unknown(e))?;
 
         let access_claim = AccessClaims::new(user.id.to_string(), Role::User);
+
+        self.session_service
+            .create_session(&Session::new(
+                access_claim.jti.parse()?,
+                user.id,
+                request.user_agent.to_string(),
+                request.ip_address.to_string(),
+            ))
+            .await?;
+
         self.jwt_service
             .generate_token(&access_claim)
             .await
@@ -93,10 +109,25 @@ impl LoginUseCaseInterface for LoginUseCase {
     }
 
     async fn authorize_current_user(&self, token: &str) -> anyhow::Result<AccessClaims> {
-        self.jwt_service.verify_token(token).await.map_err(|e| {
+        let claims = self.jwt_service.verify_token(token).await.map_err(|e| {
             error!("Error when verifying token: {}", e);
             e
-        })
+        })?;
+
+        let session = self
+            .session_service
+            .check_session(&claims.jti)
+            .await
+            .map_err(|e| {
+                error!("Error when getting session: {}", e);
+                e
+            })?;
+
+        if !session {
+            return Err(GenericError::unauthorized());
+        }
+
+        Ok(claims)
     }
 }
 #[cfg(test)]
@@ -142,6 +173,8 @@ mod tests {
             .login(LoginRequest {
                 username: "invalidusername",
                 password: "passwordpassword1",
+                user_agent: "user_agent",
+                ip_address: "ip_address",
             })
             .await;
         assert!(result.is_err());

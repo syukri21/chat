@@ -29,6 +29,9 @@ pub enum GenericError {
 
     #[error("User already exists")]
     UserAlreadyExists(),
+
+    #[error("Unauthorized")]
+    Unauthorized(),
 }
 
 impl GenericError {
@@ -67,5 +70,10 @@ impl GenericError {
     pub fn user_not_found(error: Error) -> anyhow::Error {
         error!("user not found :{}", error);
         GenericError::UserNotFound().into()
+    }
+
+    pub fn unauthorized() -> anyhow::Error {
+        error!("unauthorized");
+        GenericError::Unauthorized().into()
     }
 }

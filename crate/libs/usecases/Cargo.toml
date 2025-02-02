@@ -21,6 +21,7 @@ env_logger = "0.11.6"
 
 persistence = { path = "../persistence" }
 users = { path = "../domain/users" }
+sessions = { path = "../domain/sessions" }
 credentials = { path = "../domain/credentials" }
 chats = { path = "../domain/chats" }
 commons = { path = "../commons" }

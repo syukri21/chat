@@ -3,6 +3,9 @@ use crate::WebModule;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Form;
+use axum_client_ip::{SecureClientIp};
+use axum_extra::headers::UserAgent;
+use axum_extra::TypedHeader;
 use commons::generic_errors::GenericError;
 use http::header::SET_COOKIE;
 use serde::Deserialize;
@@ -17,23 +20,37 @@ pub struct LoginForm {
 }
 
 impl LoginForm {
-    fn to_login_request(&self) -> LoginRequest {
+    fn to_login_request<'a>(
+        &'a self,
+        user_agent: &'a str,
+        ip_address: &'a str,
+    ) -> LoginRequest<'a> {
         LoginRequest {
             username: self.username_or_email.as_str(),
             password: self.password.as_str(),
+            user_agent,
+            ip_address,
         }
     }
 }
 
 pub async fn login(
+    user_agent: Option<TypedHeader<UserAgent>>,
+    SecureClientIp(ip): SecureClientIp,
     login_usecase: Inject<WebModule, dyn LoginUseCaseInterface>,
     Form(form): Form<LoginForm>,
 ) -> impl IntoResponse {
+    let user_agent = user_agent
+        .map(|user_agent| user_agent.0.to_string())
+        .unwrap_or_else(|| "unknown".to_string());
+    let ip = ip.to_string();
     info!(
-        "Login started for username or email {}",
-        form.username_or_email
+        "Login started for username or email {}, user_agent: {}, ip: {}",
+        form.username_or_email, user_agent, ip
     );
-    match login_usecase.login(form.to_login_request()).await {
+    let login_request = form.to_login_request(user_agent.as_str(), ip.as_str());
+
+    match login_usecase.login(login_request).await {
         Ok(response) => {
             info!("Login successful");
             let mut headers = HeaderMap::new();

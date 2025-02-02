@@ -65,11 +65,11 @@ pub trait DatabaseInterface: Interface + Send + Sync {
     async fn init(&mut self) -> anyhow::Result<()>;
 
     async fn migrate(&self) {
-        let pool = self.get_pool();
-        sqlx::migrate!("../../../migrations")
-            .run(&*pool)
-            .await
-            .expect("Failed to run database migrations");
+        // let pool = self.get_pool();
+        // sqlx::migrate!("../../../migrations")
+        //     .run(&*pool)
+        //     .await
+        //     .expect("Failed to run database migrations");
     }
 }
 

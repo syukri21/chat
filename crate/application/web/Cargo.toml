@@ -13,9 +13,12 @@ serde.workspace = true
 shaku.workspace = true
 shaku_axum = "0.6.0"
 anyhow.workspace = true
+log = "0.4.22"
+http = "1.2.0"
 
 axum = { version = "0.8.1", features = ["ws"] }
 axum-extra = { version = "0.10.0", features = ["typed-header", "cookie"] }
+axum-client-ip = "0.7.0"
 
 tower-http = { version = "0.6.1", features = ["trace", "fs", "add-extension"] }
 
@@ -28,5 +31,4 @@ commons = { path = "../../libs/commons" }
 mail = { path = "../../libs/clients/mail" }
 crypto = { path = "../../libs/clients/crypto" }
 jwt = { path = "../../libs/clients/jwt" }
-log = "0.4.22"
-http = "1.2.0"
+sessions = { path = "../../libs/domain/sessions" }

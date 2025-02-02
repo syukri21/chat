@@ -1,7 +1,7 @@
 -- Add up migration script here
 CREATE TABLE sessions
 (
-    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    id         UUID PRIMARY KEY,
     session_id UUID UNIQUE NOT NULL, -- this should be jti, and unique
     user_id    UUID,
     user_agent VARCHAR(255),

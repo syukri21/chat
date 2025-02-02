@@ -7,6 +7,7 @@ use axum::middleware::Next;
 use axum::response::Response;
 use axum::routing::{get, post};
 use axum::{extract, middleware, Router};
+use axum_client_ip::SecureClientIpSource;
 use axum_extra::extract::CookieJar;
 use chats::chat_services::ChatService;
 use credentials::credential_services::CredentialService;
@@ -16,8 +17,10 @@ use jwt::JWT;
 use log::{error, info, trace};
 use mail::Mail;
 use persistence::{DatabaseInterface, Env, DB};
+use sessions::services::SessionService;
 use shaku::{module, HasComponent};
 use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
@@ -42,7 +45,7 @@ mod utils;
 
 module! {
      WebModule {
-        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto ],
+        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto ],
         providers = []
     }
 }
@@ -87,6 +90,7 @@ async fn main() {
         .nest("/htmx", htmx_app)
         .nest("/callback", callback_app)
         .nest("/debug", debug_app)
+        .layer(SecureClientIpSource::ConnectInfo.into_extension())
         .layer(AddExtensionLayer::new(debug_state))
         .route_layer(middleware::from_fn_with_state(login_usecase.clone(), auth))
         .with_state(arc_module);
@@ -97,7 +101,7 @@ async fn main() {
     // run it
     let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
     debug!("listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, app)
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
         .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
@@ -110,7 +114,7 @@ fn tracing_init() {
                 // axum logs rejections from built-in extractors with the `axum::rejection`
                 // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
                 format!(
-                    "{}=debug,tower_http=debug,axum::rejection=trace,mail=debug,commons=debug",
+                    "{}=debug,tower_http=debug,axum::rejection=trace,mail=debug,commons=debug,sessions=debug",
                     env!("CARGO_CRATE_NAME")
                 )
                 .into()
@@ -167,8 +171,8 @@ fn with_tracing(app: Router) -> Router {
                 },
             )
             .on_failure(
-                |_error: ServerErrorsFailureClass, _latency: Duration, _span: &Span| {
-                    // ...
+                |error: ServerErrorsFailureClass, _latency: Duration, _span: &Span| {
+                    error!("request failed with error {}", error);
                 },
             ),
     )
@@ -211,16 +215,16 @@ async fn auth(
         .value();
 
     trace!("Auth header: {}", auth_header);
-    match login_usecase.authorize_current_user(auth_header).await {
-        Ok(access_claim) => {
-            req.extensions_mut().insert(access_claim);
-            Ok(next.run(req).await)
-        }
-        Err(e) => {
+    let claims = login_usecase
+        .authorize_current_user(auth_header)
+        .await
+        .map_err(|e| {
             error!("Error when authorizing current user: {}", e);
-            Err(StatusCode::UNAUTHORIZED)
-        }
-    }
+            StatusCode::UNAUTHORIZED
+        })?;
+
+    req.extensions_mut().insert(claims);
+    Ok(next.run(req).await)
 }
 
 async fn shutdown_signal() {
