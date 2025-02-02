@@ -1,3 +1,4 @@
+use crate::measure_time;
 use commons::generic_errors::GenericError;
 use credentials::credential_services::CredentialServiceInterface;
 use jwt::{AccessClaims, JWTInterface, Role};
@@ -66,36 +67,42 @@ impl LoginUseCaseInterface for LoginUseCase {
     async fn login(&self, request: LoginRequest<'_>) -> anyhow::Result<LoginResponse> {
         request.validate().await?;
 
-        let user = self
-            .user_service
-            .get_user_by_username(request.username)
-            .await
-            .map_err(|e| match e.downcast_ref::<Error>() {
-                Some(Error::RowNotFound) => GenericError::login_failed(),
-                _ => GenericError::unknown(e),
-            })?;
+        let user = measure_time!(
+            "get_user_by_username",
+            self.user_service
+                .get_user_by_username(request.username)
+                .await
+                .map_err(|e| match e.downcast_ref::<Error>() {
+                    Some(Error::RowNotFound) => GenericError::login_failed(),
+                    _ => GenericError::unknown(e),
+                })?
+        );
 
-        let is_password_valid = user.match_password(request.password);
+        let is_password_valid =
+            measure_time!("match_password", user.match_password(request.password));
         if !is_password_valid {
             return Err(GenericError::login_failed());
         }
 
-        let credential = self
-            .credential_service
-            .get_credential_by_user_id(user.id)
-            .await
-            .map_err(|e| GenericError::unknown(e))?;
+        let credential = measure_time!(
+            "get_credential_by_user_id",
+            self.credential_service
+                .get_credential_by_user_id(user.id)
+                .await
+                .map_err(|e| GenericError::unknown(e))?
+        );
 
         let access_claim = AccessClaims::new(user.id.to_string(), Role::User);
 
-        self.session_service
-            .create_session(&Session::new(
+        measure_time!(
+            "create_session",
+            self.session_service.create_session(&Session::new(
                 access_claim.jti.parse()?,
                 user.id,
                 request.user_agent.to_string(),
                 request.ip_address.to_string(),
-            ))
-            .await?;
+            )).await?
+        );
 
         self.jwt_service
             .generate_token(&access_claim)
@@ -130,6 +137,7 @@ impl LoginUseCaseInterface for LoginUseCase {
         Ok(claims)
     }
 }
+
 #[cfg(test)]
 mod tests {
     use crate::login_usecase::{LoginRequest, LoginUseCase, LoginUseCaseInterface};
