@@ -40,15 +40,27 @@
         </div>
       </div>
       <!-- Search Friends -->
-      <div id="searchFriendsBar" class="p-2 bg-white">
-        <div class="bg-blue-50 rounded-lg flex items-center px-3 py-1">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24"
+      <div id="searchFriendsBar" class="p-4 bg-white hidden">
+        <div class="bg-blue-50 rounded-lg flex items-center px-4 py-2 shadow-sm hover:shadow-md transition-shadow duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input type="text" placeholder="Search for friends"
-            class="bg-transparent border-none w-full p-2 focus:outline-none text-sm">
+            class="bg-transparent border-none w-full px-3 py-1 focus:outline-none focus:ring-0 text-sm text-gray-700 placeholder-gray-500">
+          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-1" id="searchAddButton">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span class="text-sm font-medium">Add</span>
+          </button>
+        </div>
+        <!-- Search Results -->
+        <div id="searchResults" class="mt-4 hidden">
+          <div class="space-y-2">
+            <!-- Results will be dynamically populated here -->
+          </div>
         </div>
       </div>
       <!-- Search Bar -->
@@ -64,7 +76,7 @@
         </div>
       </div>
       <!-- Users List -->
-      <div class="flex-1 overflow-y-auto bg-white">
+      <div class="flex-1 overflow-y-auto bg-white" id="userLists">
         <!-- User Item -->
         <div class="flex items-center px-3 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100">
           <img src="/assets/user-1.png" alt="User" class="w-12 h-12 rounded-full">
@@ -151,6 +163,38 @@
       const searchFriendsBar = document.getElementById('searchFriendsBar');
       const regularSearchBar = document.getElementById('regularSearchBar');
       const addFriendsButton = dropdownMenu.querySelector('button');
+      const userLists = document.getElementById("userLists");
+      const searchAddButton = document.getElementById("searchAddButton");
+      const searchResults = document.getElementById("searchResults");
+
+      // Dummy user data
+      const dummyUsers = [
+        { id: 1, name: "Alice Johnson", avatar: "/assets/user-1.png", status: "online" },
+        { id: 2, name: "Bob Smith", avatar: "/assets/user-1.png", status: "offline" },
+        { id: 3, name: "Carol White", avatar: "/assets/user-1.png", status: "online" },
+        { id: 4, name: "David Brown", avatar: "/assets/user-1.png", status: "offline" }
+      ];
+
+      function displaySearchResults() {
+        const resultsContainer = searchResults.querySelector('div');
+        resultsContainer.innerHTML = dummyUsers.map(user => `
+          <div class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm hover:bg-blue-50 transition-colors duration-200">
+            <div class="flex items-center space-x-3">
+              <img src="${user.avatar}" alt="${user.name}" class="w-10 h-10 rounded-full">
+              <div>
+                <h3 class="text-sm font-medium text-gray-900">${user.name}</h3>
+                <span class="text-xs text-gray-500">${user.status}</span>
+              </div>
+            </div>
+            <button class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-100 rounded-full transition-colors duration-200">Add Friend</button>
+          </div>
+        `).join('');
+      }
+
+      searchAddButton.addEventListener('click', function() {
+        searchResults.classList.remove('hidden');
+        displaySearchResults();
+      });
 
       menuButton.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -162,6 +206,7 @@
         searchFriendsBar.classList.remove('hidden');
         regularSearchBar.classList.add('hidden');
         dropdownMenu.classList.add('hidden');
+        userLists.classList.add('hidden');
       });
 
       document.addEventListener('click', function (e) {
@@ -172,6 +217,8 @@
         if (!searchFriendsBar.contains(e.target) && !e.target.matches('.add-friends-button')) {
           searchFriendsBar.classList.add('hidden');
           regularSearchBar.classList.remove('hidden');
+          userLists.classList.remove('hidden');
+          searchResults.classList.add('hidden');
         }
       });
     });
