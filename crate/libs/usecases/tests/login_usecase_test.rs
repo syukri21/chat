@@ -82,6 +82,8 @@ mod tests {
         let request = LoginRequest {
             username: "syukri1",
             password: "password8",
+            user_agent: "user_agent",
+            ip_address: "ip_address",
         };
         let response = login_usecase.login(request).await.unwrap();
         assert!(response.token.len() > 0, "token should not be empty");
@@ -129,6 +131,8 @@ mod tests {
         let request = LoginRequest {
             username: "syukritest",
             password: "invalid_password",
+            user_agent: "user_agent",
+            ip_address: "ip_address",
         };
         let response = login_usecase.login(request).await;
         assert!(response.is_err(), "response should be error");
