@@ -1,4 +1,4 @@
-use crate::user::User;
+use crate::user::{User, UserInfo};
 use chrono::NaiveDateTime;
 use persistence::DatabaseInterface;
 use shaku::{Component, Interface};
@@ -20,6 +20,7 @@ pub trait UserServiceInterface: Interface + Send + Sync {
     async fn get_user_by_uuid(&self, id: Uuid) -> anyhow::Result<User>;
     async fn get_user_by_username(&self, username: &str) -> anyhow::Result<User>;
     async fn activate_user(&self, id: Uuid) -> anyhow::Result<()>;
+    async fn find_user_info_list(&self, query: &str) -> anyhow::Result<Vec<UserInfo>>;
 }
 
 impl UserService {
@@ -149,4 +150,32 @@ impl UserServiceInterface for UserService {
         tx.commit().await?;
         Ok(())
     }
+
+    async fn find_user_info_list(&self, params: &str) -> anyhow::Result<Vec<UserInfo>> {
+        let mut connection = self.db.get_pool().acquire().await?;
+
+        let query = r#"
+        SELECT
+            id,
+            username
+        FROM users
+        WHERE is_active = true and (lower(username) LIKE ? or lower(email) LIKE ?)"#;
+
+        let result = sqlx::query(query)
+            .bind(format!("%{}%", params.to_lowercase()))
+            .bind(format!("%{}%", params.to_lowercase()))
+            .fetch_all(&mut *connection)
+            .await?;
+        
+        result.iter()
+            .map(|row| {
+                Ok(UserInfo::new( 
+                    row.try_get::<String, _>("id")?.parse()?,
+                    row.try_get("username")?,
+                ))
+            })
+            .collect()
+        
+    }
+
 }

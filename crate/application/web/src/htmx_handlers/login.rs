@@ -3,7 +3,7 @@ use crate::WebModule;
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Form;
-use axum_client_ip::{SecureClientIp};
+use axum_client_ip::SecureClientIp;
 use axum_extra::headers::UserAgent;
 use axum_extra::TypedHeader;
 use commons::generic_errors::GenericError;

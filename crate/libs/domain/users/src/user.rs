@@ -41,3 +41,15 @@ impl User {
         bcrypt::verify(password, &self.password).unwrap_or(false)
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UserInfo {
+    pub id: Uuid,
+    pub username: String,
+}
+
+impl UserInfo {
+    pub fn new(id: Uuid, username: String) -> Self {
+        Self { id, username }
+    }
+}

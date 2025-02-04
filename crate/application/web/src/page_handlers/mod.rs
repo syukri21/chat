@@ -1,5 +1,5 @@
 use crate::WebModule;
-use axum::extract::{Path };
+use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
 use commons::generic_errors::GenericError;
@@ -15,6 +15,9 @@ pub async fn login() -> Html<&'static str> {
 }
 pub async fn signup() -> Html<&'static str> {
     Html(include_str!("../../page/signup.html"))
+}
+pub async fn profile() -> Html<&'static str> {
+    Html(include_str!("../../page/profile.html"))
 }
 pub async fn callback_activate(
     register_usecase: Inject<WebModule, dyn RegisterUseCaseInterface>,

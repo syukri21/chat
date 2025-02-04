@@ -12,6 +12,7 @@ use axum_extra::extract::CookieJar;
 use chats::chat_services::ChatService;
 use credentials::credential_services::CredentialService;
 use crypto::Crypto;
+use htmx_handlers::chat;
 use http::StatusCode;
 use jwt::JWT;
 use log::{error, info, trace};
@@ -75,6 +76,7 @@ async fn main() {
     // In main function
     let htmx_app = Router::new()
         .route("/register", post(register::register))
+        .route("/find-users", get(chat::find_user_info_list))
         .route("/login", post(login::login));
 
     // This is callback nest routes
@@ -87,6 +89,7 @@ async fn main() {
         .route("/", get(page_handlers::home))
         .route("/login", get(page_handlers::login))
         .route("/signup", get(page_handlers::signup))
+        .route("/profile", get(page_handlers::profile))
         .nest("/htmx", htmx_app)
         .nest("/callback", callback_app)
         .nest("/debug", debug_app)
@@ -101,10 +104,13 @@ async fn main() {
     // run it
     let listener = TcpListener::bind("127.0.0.1:3000").await.unwrap();
     debug!("listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>())
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .unwrap();
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await
+    .unwrap();
 }
 
 fn tracing_init() {
