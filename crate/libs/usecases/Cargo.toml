@@ -28,3 +28,4 @@ commons = { path = "../commons" }
 mail = { path = "../clients/mail" }
 crypto = { path = "../clients/crypto" }
 jwt = { path = "../clients/jwt" }
+user_details = { path = "../domain/user_details" }

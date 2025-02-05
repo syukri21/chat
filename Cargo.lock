@@ -3421,6 +3421,7 @@ dependencies = [
  "sqlx",
  "tokio",
  "tracing",
+ "user_details",
  "users",
  "uuid",
 ]
@@ -3436,6 +3437,7 @@ dependencies = [
  "shaku",
  "sqlx",
  "tokio",
+ "tracing",
  "uuid",
 ]
 
@@ -3580,6 +3582,7 @@ dependencies = [
  "axum-client-ip",
  "axum-extra",
  "chats",
+ "chrono",
  "commons",
  "credentials",
  "crypto",
@@ -3598,6 +3601,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "usecases",
+ "user_details",
  "users",
  "uuid",
 ]

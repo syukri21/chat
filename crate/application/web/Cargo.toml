@@ -13,6 +13,7 @@ serde.workspace = true
 shaku.workspace = true
 shaku_axum = "0.6.0"
 anyhow.workspace = true
+chrono.workspace = true
 log = "0.4.22"
 http = "1.2.0"
 
@@ -32,3 +33,4 @@ mail = { path = "../../libs/clients/mail" }
 crypto = { path = "../../libs/clients/crypto" }
 jwt = { path = "../../libs/clients/jwt" }
 sessions = { path = "../../libs/domain/sessions" }
+user_details = { path = "../../libs/domain/user_details" }

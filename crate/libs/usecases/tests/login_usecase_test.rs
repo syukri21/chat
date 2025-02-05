@@ -7,6 +7,7 @@ mod tests {
     use persistence::db::sqlite::create_sqlite_db_pool;
     use persistence::env::myenv::EnvInterface;
     use persistence::{DatabaseInterface, Env, DB};
+    use sessions::services::SessionService;
     use shaku::{module, HasComponent};
     use std::sync::Arc;
     use usecases::{LoginRequest, LoginUseCase, LoginUseCaseInterface};
@@ -15,7 +16,7 @@ mod tests {
 
     module! {
         TestModule {
-            components = [LoginUseCase, UserService, CredentialService, Env, DB, JWT],
+            components = [LoginUseCase, UserService, CredentialService, SessionService, Env, DB, JWT],
             providers = []
         }
     }

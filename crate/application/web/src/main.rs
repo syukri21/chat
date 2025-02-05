@@ -12,7 +12,7 @@ use axum_extra::extract::CookieJar;
 use chats::chat_services::ChatService;
 use credentials::credential_services::CredentialService;
 use crypto::Crypto;
-use htmx_handlers::chat;
+use htmx_handlers::{chat, user_detail};
 use http::StatusCode;
 use jwt::JWT;
 use log::{error, info, trace};
@@ -34,7 +34,9 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{debug, info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use usecases::userdetail_usecase::UserDetailUsecaseImpl;
 use usecases::{InvitePrivateChatUsecase, LoginUseCase, LoginUseCaseInterface, RegisterUseCase};
+use user_details::user_detail_service::UserDetailServiceImpl;
 use users::user_services::UserService;
 
 // Add this near the top with other modules
@@ -46,7 +48,7 @@ mod utils;
 
 module! {
      WebModule {
-        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto ],
+        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto , UserDetailServiceImpl, UserDetailUsecaseImpl],
         providers = []
     }
 }
@@ -77,6 +79,7 @@ async fn main() {
     let htmx_app = Router::new()
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
+        .route("/profile", post(user_detail::update_profile))
         .route("/login", post(login::login));
 
     // This is callback nest routes

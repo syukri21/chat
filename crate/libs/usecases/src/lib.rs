@@ -3,6 +3,7 @@ pub mod login_usecase;
 pub mod register_usecase;
 pub mod utils;
 mod macros;
+pub mod userdetail_usecase;
 
 pub use register_usecase::{
     RegisterRequest, RegisterResponse, RegisterUseCase, RegisterUseCaseInterface,
