@@ -9,7 +9,10 @@ members = [
     "crate/libs/clients/mail",
     "crate/libs/clients/crypto",
     "crate/libs/clients/jwt",
-    "crate/libs/domain/chats", "crate/application/web", "crate/libs/domain/sessions"]
+    "crate/libs/domain/chats",
+    "crate/application/web",
+    "crate/libs/domain/sessions",
+    "crate/libs/domain/user_details"]
 
 
 [workspace.dependencies]

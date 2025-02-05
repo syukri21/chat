@@ -3426,6 +3426,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "user_details"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "persistence",
+ "shaku",
+ "sqlx",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "users"
 version = "0.1.0"
 dependencies = [
