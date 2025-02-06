@@ -20,7 +20,7 @@ use crate::WebModule;
 pub struct UpdateProfileForm {
     first_name: String,
     last_name: String,
-    date_of_birth: Option<String>,
+    dob: Option<String>,
     gender: Option<String>,
     profile_picture: Option<String>,
 }
@@ -28,7 +28,7 @@ pub struct UpdateProfileForm {
 impl UpdateProfileForm {
     pub fn to_user_detail(&self, user_id: Uuid) -> anyhow::Result<UserDetail> {
         // this date should look like this: "2000-01-01"
-        let date_of_birth = self.date_of_birth.clone();
+        let date_of_birth = self.dob.clone();
         let date_of_birth = match date_of_birth {
             Some(date) => {
                 let date = chrono::NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d");
