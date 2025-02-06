@@ -36,9 +36,8 @@ impl UserDetailService for UserDetailServiceImpl {
         last_name,
         gender,
         date_of_birth,
-        profile_image,
         created_at, 
-        updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"#;
+        updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"#;
         sqlx::query(query)
             .bind(user_detail.id.to_string())
             .bind(user_detail.user_id.to_string())
@@ -46,7 +45,6 @@ impl UserDetailService for UserDetailServiceImpl {
             .bind(user_detail.last_name.clone())
             .bind(user_detail.gender.clone())
             .bind(user_detail.date_of_birth)
-            .bind(user_detail.profile_picture.clone())
             .bind(user_detail.created_at)
             .bind(user_detail.updated_at)
             .execute(&mut *connection)
@@ -61,16 +59,15 @@ impl UserDetailService for UserDetailServiceImpl {
 
     async fn update_user_detail(&self, user_detail: &UserDetail) -> anyhow::Result<()> {
         let mut connection = self.db.get_pool().acquire().await?;
-        let query = r#"UPDATE user_details SET first_name = ?,
+        let query = r#"UPDATE user_details SET 
+        first_name = ?,
         last_name = ?,
-        profile_image = ?,
         gender = ?,
         date_of_birth = ?,
         updated_at = ? WHERE user_id = ?"#;
         sqlx::query(query)
             .bind(user_detail.first_name.clone())
             .bind(user_detail.last_name.clone())
-            .bind(user_detail.profile_picture.clone())
             .bind(user_detail.gender.clone())
             .bind(user_detail.date_of_birth)
             .bind(user_detail.updated_at)
