@@ -4,6 +4,7 @@ use axum::{
     response::{Html, IntoResponse, Response},
     Form,
 };
+use axum_extra::extract::Multipart;
 use commons::generic_errors::GenericError;
 use http::StatusCode;
 use jwt::AccessClaims;
@@ -83,4 +84,39 @@ pub async fn update_profile(
                 .into_response();
         }
     }
+}
+
+pub async fn upload_profile_picture(
+    claim: axum::extract::Extension<AccessClaims>,
+    user_detail_service: Inject<WebModule, dyn UserDetailUsecase>,
+    mut multipart: Multipart,
+) -> impl IntoResponse {
+    // Iterate over the multipart fields
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        let field_name = field.name().unwrap_or_default().to_string();
+        // If this is the file field, read it into a Vec<u8>
+        if field_name == "profile_picture" {
+            let file_data = field.bytes().await.unwrap();
+            let result = user_detail_service
+                .upload_profile_picture(&claim.user_id, &file_data.to_vec())
+                .await;
+
+            if result.is_err() {
+                return Response::builder()
+                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .body(String::from("Failed to upload profile picture"))
+                    .unwrap()
+                    .into_response();
+            }
+
+            return Html(include_str!("../../page/htmx/success_update_profile.html"))
+                .into_response();
+        }
+    }
+
+    return Response::builder()
+        .status(StatusCode::BAD_REQUEST)
+        .body(String::from("No file found"))
+        .unwrap()
+        .into_response();
 }

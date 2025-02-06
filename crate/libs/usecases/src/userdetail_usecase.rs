@@ -1,10 +1,20 @@
-use std::sync::Arc;
+use std::{fs, path::Path, sync::Arc};
+use uuid::Uuid;
 
+use anyhow::Context;
 use async_trait::async_trait;
 use commons::generic_errors::GenericError;
+use infer::Infer;
 use shaku::{Component, Interface};
 use user_details::{entity::UserDetail, user_detail_service::UserDetailService};
 use users::{user::User, user_services::UserServiceInterface};
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UserInfo {
+    pub username: String,
+    pub email: String,
+    pub user_details: Option<UserDetail>,
+}
 
 #[derive(Component)]
 #[shaku(interface = UserDetailUsecase)]
@@ -19,6 +29,11 @@ pub struct UserDetailUsecaseImpl {
 pub trait UserDetailUsecase: Interface {
     async fn update_profile(&self, user_detail: &UserDetail) -> anyhow::Result<()>;
     async fn get_user_info(&self, user_id: &str) -> anyhow::Result<UserInfo>;
+    async fn upload_profile_picture(
+        &self,
+        user_id: &str,
+        image: &Vec<u8>,
+    ) -> anyhow::Result<String>;
 }
 
 #[async_trait]
@@ -49,11 +64,40 @@ impl UserDetailUsecase for UserDetailUsecaseImpl {
             user_details: user_detail,
         })
     }
-}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UserInfo {
-    pub username: String,
-    pub email: String,
-    pub user_details: Option<UserDetail>,
+    async fn upload_profile_picture(
+        &self,
+        user_id: &str,
+        image: &Vec<u8>,
+    ) -> anyhow::Result<String> {
+        // Validate the file type
+        let infer = Infer::new();
+        if !infer.is_image(&image) {
+            return Err(anyhow::anyhow!("Uploaded file is not a valid image"));
+        }
+
+        // Create the uploads directory if it doesn't exist
+        let upload_dir = Path::new("crate/application/web/assets/uploads");
+        if !upload_dir.exists() {
+            if fs::create_dir_all(upload_dir).is_err() {
+                return Err(anyhow::anyhow!("Failed to create uploads directory"));
+            };
+        }
+
+        // Generate a unique filename using UUID and the user ID
+        let file_name = format!("{}_{}.png", user_id, Uuid::new_v4());
+        let file_path = upload_dir.join(file_name.clone());
+
+        // Write the image bytes to the file
+        fs::write(&file_path, image).context("Failed to write image to file")?;
+
+        let file_name = format!("/assets/uploads/{}", file_name);
+        self.user_detail_service
+            .update_profile_picture(user_id, file_name.as_str())
+            .await
+            .map_err(|e| GenericError::unknown(e))?;
+        
+        // Return the file path or URL
+        Ok(file_name)
+    }
 }

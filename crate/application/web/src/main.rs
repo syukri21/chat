@@ -80,6 +80,7 @@ async fn main() {
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
         .route("/update-profile", post(user_detail::update_profile))
+        .route("/upload-profile-picture", post(user_detail::upload_profile_picture))
         .route("/login", post(login::login));
 
     // This is callback nest routes

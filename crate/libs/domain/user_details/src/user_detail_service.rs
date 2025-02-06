@@ -22,6 +22,7 @@ pub trait UserDetailService: Interface {
     async fn is_user_detail_exist(&self, user_id: &str) -> anyhow::Result<bool>;
     async fn upsert_user_detail(&self, user_detail: &UserDetail) -> anyhow::Result<()>;
     async fn get_user_detail_by_user_id(&self, user_id: &str) -> anyhow::Result<UserDetail>;
+    async fn update_profile_picture(&self, user_id: &str, file_path: &str) -> anyhow::Result<()>;
 }
 
 #[async_trait::async_trait]
@@ -128,5 +129,21 @@ impl UserDetailService for UserDetailServiceImpl {
         }
 
         UserDetail::from(results)
+    }
+
+
+    async fn update_profile_picture(&self, user_id: &str, file_path: &str) -> anyhow::Result<()> {
+        let mut connection = self.db.get_pool().acquire().await?;
+        let query = r#"UPDATE user_details SET profile_picture = ? WHERE user_id = ?"#;
+        sqlx::query(query)
+            .bind(file_path)
+            .bind(user_id)
+            .execute(&mut *connection)
+            .await
+            .map_err(|e| {
+                error!("Failed to update user_detail: {}", e);
+                anyhow!("Failed to update user_detail")
+            })?;
+        Ok(())
     }
 }

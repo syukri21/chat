@@ -30,6 +30,13 @@ pub async fn profile(
         return Html(SOMETHING_WENT_WRONG.to_string());
     };
 
+    //<img id="profile-preview" src="https://ui-avatars.com/api/?name={{username}}" alt="Profile Picture"
+
+    let profile_picture = format!(
+        "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
+        &user_info.username
+    );
+
     let template = PROFILE_TEMPLATE
         .replace("{{username}}", &user_info.username)
         .replace("{{email}}", &user_info.email);
@@ -39,6 +46,12 @@ pub async fn profile(
             let template = template
                 .replace("{{last_name}}", &user_detail.last_name)
                 .replace("{{first_name}}", &user_detail.first_name)
+                .replace(
+                    "{{profile_picture}}",
+                    &user_detail
+                        .profile_picture
+                        .map_or_else(|| profile_picture, |x| x.to_string()),
+                )
                 .replace(
                     "{{dob}}",
                     &user_detail
@@ -55,6 +68,7 @@ pub async fn profile(
         }
         _ => {
             let template = template
+                .replace("{{profile_picture}}", profile_picture.as_str())
                 .replace("{{last_name}}", "")
                 .replace("{{first_name}}", "")
                 .replace("{{dob}}", "")

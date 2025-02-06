@@ -12,6 +12,7 @@ sqlx.workspace = true
 shaku.workspace = true
 async-trait.workspace = true
 tracing.workspace = true
+infer.workspace = true
 
 persistence = { path = "../../persistence" }
 
