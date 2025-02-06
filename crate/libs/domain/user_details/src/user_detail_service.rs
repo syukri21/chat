@@ -122,6 +122,11 @@ impl UserDetailService for UserDetailServiceImpl {
                 error!("Failed to get user_detail: {}", e);
                 anyhow!("Failed to get user_detail")
             })?;
+
+        if results.is_empty() {
+            return Err(anyhow!("User detail not found"));
+        }
+
         UserDetail::from(results)
     }
 }

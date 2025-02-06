@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use axum::{
-    response::{IntoResponse, Response},
+    response::{Html, IntoResponse, Response},
     Form,
 };
 use commons::generic_errors::GenericError;
@@ -63,7 +63,6 @@ pub async fn update_profile(
 ) -> impl IntoResponse {
     let user_id = claim.user_id.as_str();
     let user_detail = form.to_user_detail(Uuid::from_str(user_id).unwrap());
-
     if user_detail.is_err() {
         return Response::builder()
             .status(StatusCode::BAD_REQUEST)
@@ -74,9 +73,7 @@ pub async fn update_profile(
     }
     let user_detail = user_detail.unwrap();
     match user_detail_service.update_profile(&user_detail).await {
-        Ok(user_detail) => {
-            return (StatusCode::OK, user_detail).into_response();
-        }
+        Ok(_) => Html(include_str!("../../page/htmx/success_update_profile.html")).into_response(),
         Err(e) => {
             error!("Error occurred during update_profile: {}", e);
             return Response::builder()

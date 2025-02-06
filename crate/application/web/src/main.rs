@@ -79,7 +79,7 @@ async fn main() {
     let htmx_app = Router::new()
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
-        .route("/profile", post(user_detail::update_profile))
+        .route("/update-profile", post(user_detail::update_profile))
         .route("/login", post(login::login));
 
     // This is callback nest routes
@@ -123,7 +123,7 @@ fn tracing_init() {
                 // axum logs rejections from built-in extractors with the `axum::rejection`
                 // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
                 format!(
-                    "{}=debug,tower_http=debug,axum::rejection=trace,mail=debug,commons=debug,sessions=debug,usecases=info",
+                    "{}=debug,user_details=debug,tower_http=debug,axum::rejection=trace,mail=debug,commons=debug,sessions=debug,usecases=info",
                     env!("CARGO_CRATE_NAME")
                 )
                 .into()

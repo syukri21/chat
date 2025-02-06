@@ -1,11 +1,15 @@
 use crate::WebModule;
-use axum::extract::Path;
+use axum::extract::{self, Path};
 use axum::http::StatusCode;
 use axum::response::{Html, IntoResponse, Response};
 use commons::generic_errors::GenericError;
+use jwt::AccessClaims;
 use shaku_axum::Inject;
 use tracing::log::info;
+use usecases::userdetail_usecase::UserDetailUsecase;
 use usecases::RegisterUseCaseInterface;
+
+const SOMETHING_WENT_WRONG: &str = include_str!("../../page/500.html");
 
 pub async fn home() -> Html<&'static str> {
     Html(include_str!("../../page/chat.html"))
@@ -16,9 +20,50 @@ pub async fn login() -> Html<&'static str> {
 pub async fn signup() -> Html<&'static str> {
     Html(include_str!("../../page/signup.html"))
 }
-pub async fn profile() -> Html<&'static str> {
-    Html(include_str!("../../page/profile.html"))
+
+const PROFILE_TEMPLATE: &str = include_str!("../../page/profile.html");
+pub async fn profile(
+    user_detail_usecase: Inject<WebModule, dyn UserDetailUsecase>,
+    claim: extract::Extension<AccessClaims>,
+) -> Html<String> {
+    let Ok(user_info) = user_detail_usecase.get_user_info(&claim.user_id).await else {
+        return Html(SOMETHING_WENT_WRONG.to_string());
+    };
+
+    let template = PROFILE_TEMPLATE
+        .replace("{{username}}", &user_info.username)
+        .replace("{{email}}", &user_info.email);
+
+    match user_info.user_details {
+        Some(user_detail) => {
+            let template = template
+                .replace("{{last_name}}", &user_detail.last_name)
+                .replace("{{first_name}}", &user_detail.first_name)
+                .replace(
+                    "{{dob}}",
+                    &user_detail
+                        .date_of_birth
+                        .map_or_else(String::new, |date_of_birth| date_of_birth.to_string()),
+                )
+                .replace(
+                    "{{gender}}",
+                    &user_detail
+                        .gender
+                        .map_or_else(|| "Male".to_string(), |gender| gender.to_string()),
+                );
+            return Html(template);
+        }
+        _ => {
+            let template = template
+                .replace("{{last_name}}", "")
+                .replace("{{first_name}}", "")
+                .replace("{{dob}}", "")
+                .replace("{{gender}}", "");
+            return Html(template);
+        }
+    };
 }
+
 pub async fn callback_activate(
     register_usecase: Inject<WebModule, dyn RegisterUseCaseInterface>,
     Path(token): Path<String>,

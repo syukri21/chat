@@ -1,89 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Management</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+  <script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
 </head>
+
 <body class="bg-blue-50 h-screen flex items-center justify-center">
-    <div class="w-full max-w-2xl bg-white shadow-lg rounded-lg overflow-hidden">
-        <!-- Header -->
-        <div class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
-            <h1 class="text-xl font-semibold">Profile Settings</h1>
-            <a href="/chat" class="text-sm hover:bg-blue-700 px-3 py-1 rounded">Back to Chat</a>
-        </div>
-
-        <!-- Profile Form -->
-        <div class="p-6">
-            <div class="mb-8 text-center">
-                <div class="relative inline-block">
-                    <img id="profile-preview" src="/assets/user-1.png" alt="Profile Picture" 
-                         class="w-32 h-32 rounded-full border-4 border-blue-100 mb-4">
-                    <label for="profile-upload" 
-                           class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </label>
-                    <input type="file" id="profile-upload" name="profile_picture" 
-                           class="hidden" accept="image/*">
-                </div>
-            </div>
-
-            <form id="profile-form" hx-post="/htmx/update-profile" 
-                  hx-target="#profile-form" hx-swap="outerHTML">
-                <div class="space-y-4">
-                    <!-- Username -->
-                    <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <input type="text" id="username" name="username" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                               placeholder="Enter your username">
-                    </div>
-
-                    <!-- Email -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" id="email" name="email" 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" 
-                               value="user@example.com" disabled>
-                    </div>
-
-                    <!-- Bio -->
-                    <div>
-                        <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                        <textarea id="bio" name="bio" rows="3" 
-                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                                  placeholder="Tell us about yourself"></textarea>
-                    </div>
-
-                    <div id="update-error" class="text-red-600 text-sm"></div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" 
-                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                        Save Changes
-                    </button>
-                </div>
-            </form>
-        </div>
+  <div class="w-full max-w-2xl bg-white shadow-lg rounded-lg overflow-hidden">
+    <!-- Header -->
+    <div class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-semibold">Profile Settings</h1>
+      <a href="/" class="text-sm hover:bg-blue-700 px-3 py-1 rounded">Back to Chat</a>
     </div>
 
-    <script>
-        // Preview profile picture before upload
-        document.getElementById('profile-upload').addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('profile-preview').src = e.target.result;
-                }
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-    </script>
+    <!-- Profile Form -->
+    <div class="p-6">
+      <div class="mb-8 text-center">
+        <div class="relative inline-block">
+          <img id="profile-preview" src="/assets/user-1.png" alt="Profile Picture"
+            class="w-32 h-32 rounded-full border-4 border-blue-100 mb-4">
+          <label for="profile-upload"
+            class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </label>
+          <input type="file" id="profile-upload" name="profile_picture" class="hidden" accept="image/*">
+        </div>
+      </div>
+
+      <div class="hidden" id="update-success"></div>
+
+      <form id="profile-form" hx-post="/htmx/update-profile" hx-target="#update-success" hx-swap="outerHTML">
+        <div class="space-y-4">
+          <!-- First Name -->
+          <div>
+            <label for="first-name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+            <input type="text" id="first-name" name="first_name" value="{{first_name}}"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              placeholder="Enter your first name">
+          </div>
+
+          <!-- Last Name -->
+          <div>
+            <label for="last-name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+            <input type="text" id="last-name" name="last_name" value="{{last_name}}"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              placeholder="Enter your last name">
+          </div>
+
+          <!-- Username -->
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <input type="text" id="username" name="username"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" value="{{username}}">
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" id="email" name="email"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50" value="{{email}}" disabled>
+          </div>
+
+          <!-- Gender -->
+          <div>
+            <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+            <select id="gender" name="gender" value="{{gender}}"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+
+          <!-- Date of Birth -->
+          <div>
+            <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+            <input type="date" id="dob" name="dob" value="{{dob}}"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+          </div>
+
+
+          <div id="update-error" class="text-red-600 text-sm"></div>
+
+          <!-- Submit Button -->
+          <button type="submit"
+            class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Preview profile picture before upload
+    document.getElementById('profile-upload').addEventListener('change', function (e) {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.getElementById('profile-preview').src = e.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    });
+  </script>
 </body>
+
 </html>

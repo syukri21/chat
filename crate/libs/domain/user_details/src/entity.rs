@@ -1,6 +1,6 @@
 use sqlx::sqlite::SqliteRow;
-use uuid::Uuid;
 use sqlx::Row;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserDetail {
