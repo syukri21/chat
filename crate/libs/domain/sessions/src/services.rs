@@ -41,9 +41,8 @@ impl SessionServiceInterface for SessionService {
             .bind(session.updated_at)
             .execute(&mut *connection)
             .await
-            .map_err(|e| {
+            .inspect_err(|e| {
                 error!("Error occurred while creating session: {}", e.to_string());
-                e
             })?;
 
         Ok(())
@@ -61,9 +60,8 @@ impl SessionServiceInterface for SessionService {
             .bind(session_id.to_string())
             .fetch_one(&mut *connection)
             .await
-            .map_err(|e| {
+            .inspect_err(|e| {
                 error!("Error occurred while checking session: {}", e.to_string());
-                e
             })?;
 
         Ok(!session.is_empty())
@@ -81,9 +79,8 @@ impl SessionServiceInterface for SessionService {
             .bind(session_id.to_string())
             .fetch_one(&mut *connection)
             .await
-            .map_err(|e| {
+            .inspect_err(|e| {
                 error!("Error occurred while getting session: {}", e.to_string());
-                e
             })?;
 
         if session.is_empty() {
@@ -112,9 +109,8 @@ impl SessionServiceInterface for SessionService {
             .bind(session_id.to_string())
             .execute(&mut *connection)
             .await
-            .map_err(|e| {
+            .inspect_err(|e| {
                 error!("Error occurred while deleting session: {}", e.to_string());
-                e
             })?;
         Ok(())
     }
@@ -129,12 +125,11 @@ impl SessionServiceInterface for SessionService {
             .bind(user_id.to_string())
             .execute(&mut *connection)
             .await
-            .map_err(|e| {
+            .inspect_err(|e| {
                 error!(
                     "Error occurred while deleting by users session: {}",
                     e.to_string()
                 );
-                e
             })?;
         Ok(())
     }

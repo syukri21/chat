@@ -46,8 +46,10 @@ pub struct JWTToken {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Default)]
 pub enum Role {
     Admin,
+    #[default]
     User,
 }
 
@@ -61,11 +63,6 @@ impl Display for Role {
     }
 }
 
-impl Default for Role {
-    fn default() -> Self {
-        Role::User
-    }
-}
 
 impl From<&str> for Role {
     fn from(value: &str) -> Self {

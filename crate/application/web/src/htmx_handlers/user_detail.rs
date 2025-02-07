@@ -77,11 +77,11 @@ pub async fn update_profile(
         Ok(_) => Html(include_str!("../../page/htmx/success_update_profile.html")).into_response(),
         Err(e) => {
             error!("Error occurred during update_profile: {}", e);
-            return Response::builder()
+            Response::builder()
                 .status(StatusCode::BAD_REQUEST)
                 .body(String::from("sd"))
                 .unwrap()
-                .into_response();
+                .into_response()
         }
     }
 }
@@ -98,7 +98,7 @@ pub async fn upload_profile_picture(
         if field_name == "profile_picture" {
             let file_data = field.bytes().await.unwrap();
             let result = user_detail_service
-                .upload_profile_picture(&claim.user_id, &file_data.to_vec())
+                .upload_profile_picture(&claim.user_id, &file_data)
                 .await;
 
             if result.is_err() {
@@ -114,9 +114,9 @@ pub async fn upload_profile_picture(
         }
     }
 
-    return Response::builder()
+    Response::builder()
         .status(StatusCode::BAD_REQUEST)
         .body(String::from("No file found"))
         .unwrap()
-        .into_response();
+        .into_response()
 }

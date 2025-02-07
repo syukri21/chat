@@ -88,13 +88,13 @@ mod tests {
             ip_address: "ip_address",
         };
         let response = login_usecase.login(request).await.unwrap();
-        assert!(response.token.len() > 0, "token should not be empty");
+        assert!(!response.token.is_empty(), "token should not be empty");
         assert!(
-            response.private_key.len() > 0,
+            !response.private_key.is_empty(),
             "private key should not be empty"
         );
         assert!(
-            response.public_key.len() > 0,
+            !response.public_key.is_empty(),
             "public key should not be empty"
         );
         assert_eq!(

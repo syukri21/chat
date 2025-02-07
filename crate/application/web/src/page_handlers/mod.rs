@@ -81,7 +81,7 @@ pub async fn profile(
                         .gender
                         .map_or_else(|| "Male".to_string(), |gender| gender.to_string()),
                 );
-            return Html(template);
+            Html(template)
         }
         _ => {
             let template = template
@@ -90,9 +90,9 @@ pub async fn profile(
                 .replace("{{first_name}}", "")
                 .replace("{{dob}}", "")
                 .replace("{{gender}}", "");
-            return Html(template);
+            Html(template)
         }
-    };
+    }
 }
 
 pub async fn callback_activate(

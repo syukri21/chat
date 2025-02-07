@@ -39,11 +39,11 @@ pub async fn setup_module<
     env: Env,
 ) -> T {
     let pool = Arc::new(create_sqlite_db_pool(env.get_db_url()).await.unwrap());
-    let module = module_builder
+    
+    module_builder
         .with_component_parameters::<DB>(DBParameters {
             pool: Some(pool.clone()),
         })
         .with_component_override::<dyn EnvInterface>(Box::new(env))
-        .build();
-    module
+        .build()
 }

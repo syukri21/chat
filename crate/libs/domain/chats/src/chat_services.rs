@@ -30,11 +30,11 @@ impl ChatServiceInterface for ChatService {
             user1_id, user2_id
         );
         let mut pool = self.db.get_pool().begin().await?;
-        let chat = Self::create_chat(user1_id, user2_id, &mut *pool).await?;
+        let chat = Self::create_chat(user1_id, user2_id, &mut pool).await?;
         info!("Chat created: {}", chat.id);
-        Self::create_chat_member(user1_id, &mut *pool, &chat).await?;
+        Self::create_chat_member(user1_id, &mut pool, &chat).await?;
         info!("Chat member created for user1: {}", user1_id);
-        Self::create_chat_member(user2_id, &mut *pool, &chat).await?;
+        Self::create_chat_member(user2_id, &mut pool, &chat).await?;
         info!("Chat member created for user2: {}", user2_id);
         pool.commit().await?;
         Ok(chat.id)

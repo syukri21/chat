@@ -32,7 +32,8 @@ pub trait UserDetailUsecase: Interface {
     async fn upload_profile_picture(
         &self,
         user_id: &str,
-        image: &Vec<u8>,
+        //image: &Vec<u8>,
+        image: &[u8],
     ) -> anyhow::Result<String>;
 }
 
@@ -42,7 +43,7 @@ impl UserDetailUsecase for UserDetailUsecaseImpl {
         self.user_detail_service
             .upsert_user_detail(user_detail)
             .await
-            .map_err(|e| GenericError::unknown(e))
+            .map_err(GenericError::unknown)
     }
 
     async fn get_user_info(&self, user_id: &str) -> anyhow::Result<UserInfo> {
@@ -50,13 +51,13 @@ impl UserDetailUsecase for UserDetailUsecaseImpl {
             .user_service
             .get_user_by_uuid(user_id.parse()?)
             .await
-            .map_err(|e| GenericError::unknown(e))?;
+            .map_err(GenericError::unknown)?;
 
         let user_detail = self
             .user_detail_service
             .get_user_detail_by_user_id(user_id)
             .await
-            .map_or(None, |e| Some(e));
+            .ok();
 
         Ok(UserInfo {
             username: user.username,
@@ -65,23 +66,18 @@ impl UserDetailUsecase for UserDetailUsecaseImpl {
         })
     }
 
-    async fn upload_profile_picture(
-        &self,
-        user_id: &str,
-        image: &Vec<u8>,
-    ) -> anyhow::Result<String> {
+    async fn upload_profile_picture(&self, user_id: &str, image: &[u8]) -> anyhow::Result<String> {
+
         // Validate the file type
         let infer = Infer::new();
-        if !infer.is_image(&image) {
+        if !infer.is_image(image) {
             return Err(anyhow::anyhow!("Uploaded file is not a valid image"));
         }
 
         // Create the uploads directory if it doesn't exist
         let upload_dir = Path::new("crate/application/web/assets/uploads");
-        if !upload_dir.exists() {
-            if fs::create_dir_all(upload_dir).is_err() {
-                return Err(anyhow::anyhow!("Failed to create uploads directory"));
-            };
+        if !upload_dir.exists() && fs::create_dir_all(upload_dir).is_err() {
+            return Err(anyhow::anyhow!("Failed to create uploads directory"));
         }
 
         // Generate a unique filename using UUID and the user ID
@@ -95,8 +91,8 @@ impl UserDetailUsecase for UserDetailUsecaseImpl {
         self.user_detail_service
             .update_profile_picture(user_id, file_name.as_str())
             .await
-            .map_err(|e| GenericError::unknown(e))?;
-        
+            .map_err(GenericError::unknown)?;
+
         // Return the file path or URL
         Ok(file_name)
     }

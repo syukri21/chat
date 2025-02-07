@@ -34,7 +34,7 @@ pub async fn find_user_info_list(
     {
         Ok(response) => {
             let response: Vec<String> =
-                response.iter().map(|user| build_user_info(&user)).collect();
+                response.iter().map(build_user_info).collect();
             Response::builder()
                 .status(StatusCode::OK)
                 .body(response.join(""))

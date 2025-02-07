@@ -55,7 +55,6 @@ impl SendEmail for Mail {
         tracing::info!("Initializing email...");
         tokio::spawn({
             let host = host.to_string();
-            let port = port; // Assuming `port` is already a copyable type like `u16`
             let smtp_username = self.env.get_email_smtp_username().to_string();
             let smtp_password = self.env.get_email_smtp_password().to_string();
             let subject = subject.to_string(); // Clone the message if it's not `Copy`

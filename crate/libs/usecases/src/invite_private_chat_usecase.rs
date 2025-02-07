@@ -37,7 +37,7 @@ impl InvitePrivateChatUsecaseInterface for InvitePrivateChatUsecase {
             .user_service
             .get_user_by_username(request.user_email_or_username.as_str())
             .await
-            .map_err(|e| GenericError::user_not_found(e))?;
+            .map_err(GenericError::user_not_found)?;
 
         info!("target user found with id: {}", target_user.id);
         self.chats_service
@@ -46,7 +46,7 @@ impl InvitePrivateChatUsecaseInterface for InvitePrivateChatUsecase {
                 target_user.id.to_string().as_str(),
             )
             .await
-            .map_err(|e| GenericError::unknown(e))
+            .map_err(GenericError::unknown)
     }
     async fn find_user_info_list(&self, query: &str) -> anyhow::Result<Vec<UserInfo>> {
         self.user_service

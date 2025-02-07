@@ -24,7 +24,7 @@ mod tests {
         assert_eq!(fetched_user.username, user.username);
         assert_eq!(fetched_user.email, user.email);
         assert_eq!(fetched_user.password, user.password);
-        assert_eq!(fetched_user.is_active, false);
+        assert!(!fetched_user.is_active);
         assert!(fetched_user.created_at.is_some());
         assert!(fetched_user.updated_at.is_some());
         assert!(fetched_user.deleted_at.is_none());
@@ -50,7 +50,7 @@ mod tests {
         assert_eq!(fetched_user.username, user.username);
         assert_eq!(fetched_user.email, user.email);
         assert_eq!(fetched_user.password, user.password);
-        assert_eq!(fetched_user.is_active, false);
+        assert!(!fetched_user.is_active);
         assert!(fetched_user.created_at.is_some());
         assert!(fetched_user.updated_at.is_some());
         assert!(fetched_user.deleted_at.is_none());
@@ -75,7 +75,7 @@ mod tests {
         assert_eq!(fetched_user.username, user.username);
         assert_eq!(fetched_user.email, user.email);
         assert_eq!(fetched_user.password, user.password);
-        assert_eq!(fetched_user.is_active, true);
+        assert!(fetched_user.is_active);
         assert!(fetched_user.created_at.is_some());
         assert!(fetched_user.updated_at.is_some());
         assert!(fetched_user.deleted_at.is_none());

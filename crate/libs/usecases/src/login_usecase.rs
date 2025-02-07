@@ -84,7 +84,7 @@ impl LoginUseCaseInterface for LoginUseCase {
             .credential_service
             .get_credential_by_user_id(user.id)
             .await
-            .map_err(|e| GenericError::unknown(e))?;
+            .map_err(GenericError::unknown)?;
 
         let access_claim = AccessClaims::new(user.id.to_string(), Role::User);
 
@@ -100,7 +100,7 @@ impl LoginUseCaseInterface for LoginUseCase {
         self.jwt_service
             .generate_token(&access_claim)
             .await
-            .map_err(|e| GenericError::unknown(e))
+            .map_err(GenericError::unknown)
             .map(|token| LoginResponse {
                 token: token.token,
                 private_key: credential.private_key,
