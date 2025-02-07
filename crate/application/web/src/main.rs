@@ -89,7 +89,9 @@ async fn main() {
     let callback_app =
         Router::new().route("/activate/{token}", get(page_handlers::callback_activate));
 
-    let debug_app = Router::new().route("/active-link", get(debug_handlers::get_activate_link));
+    let debug_app = Router::new()
+        .route("/create-dummy-user", get(debug_handlers::create_dummy_user))
+        .route("/active-link", get(debug_handlers::get_activate_link));
 
     let app = Router::new()
         .route("/", get(page_handlers::chat))
