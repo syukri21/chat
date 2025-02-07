@@ -23,7 +23,7 @@ impl Default for DB {
 
 impl DB {
     pub async fn default(env: Arc<dyn EnvInterface>) -> Self {
-        let pool = create_sqlite_db_pool(env.get_db_url().as_ref())
+        let pool = create_sqlite_db_pool(env.get_db_url())
             .await
             .unwrap();
         Self {
@@ -65,11 +65,11 @@ pub trait DatabaseInterface: Interface + Send + Sync {
     async fn init(&mut self) -> anyhow::Result<()>;
 
     async fn migrate(&self) {
-        // let pool = self.get_pool();
-        // sqlx::migrate!("../../../migrations")
-        //     .run(&*pool)
-        //     .await
-        //     .expect("Failed to run database migrations");
+        let pool = self.get_pool();
+        sqlx::migrate!("../../../migrations")
+            .run(&*pool)
+            .await
+            .expect("Failed to run database migrations");
     }
 }
 

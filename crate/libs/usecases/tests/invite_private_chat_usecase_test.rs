@@ -31,9 +31,8 @@ mod tests {
     async fn test_invite_private_chat_usecase() {
         setup();
         info!("starting test_invite_private_chat_usecase");
-        // pretty_env_logger::init();
-        let module = utils::setup_module::<TestModule>(TestModule::builder()).await;
-
+        let env = Env::load_test();
+        let module = utils::setup_module::<TestModule>(TestModule::builder(), env).await;
         let db: &dyn DatabaseInterface = module.resolve_ref();
         db.migrate().await;
 
@@ -42,20 +41,22 @@ mod tests {
             module.resolve_ref();
         let chat_service: &dyn ChatServiceInterface = module.resolve_ref();
 
-        let user1 = User::new(
+        let mut user1 = User::new(
             String::from("user1"),
             String::from("user1@gmail.com"),
             String::from("password8"),
         )
         .unwrap();
+        user1.is_active = true;
         user_service.create_user(&user1).await.unwrap();
 
-        let user2 = User::new(
+        let mut user2 = User::new(
             String::from("user2"),
             String::from("user2@gmail.com"),
             String::from("password8"),
         )
         .unwrap();
+        user2.is_active = true;
         user_service.create_user(&user2).await.unwrap();
 
         let result = invite_private_chat_usecase

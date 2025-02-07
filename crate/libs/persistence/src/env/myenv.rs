@@ -90,6 +90,12 @@ impl Env {
         dotenv::dotenv().ok();
         Self::new()
     }
+    
+    pub fn load_test() -> Env {
+        dotenv::dotenv().ok();
+        env::set_var("DATABASE_URL", "sqlite::memory:");
+        Self::new()
+    }
 
     fn validate(&self) {
         if self.db_url.is_empty() {

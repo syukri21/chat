@@ -61,13 +61,13 @@ mod tests {
         let db = setup_db().await;
         let user_service = UserService::new(db);
 
-        let user = User::new(
+        let mut user = User::new(
             String::from("testuser"),
             String::from("testuser@test.com"),
             String::from("testpassword"),
         )
         .unwrap();
-
+        user.is_active = true;
         let result = user_service.create_user(&user).await;
         assert!(result.is_ok());
 
@@ -75,7 +75,7 @@ mod tests {
         assert_eq!(fetched_user.username, user.username);
         assert_eq!(fetched_user.email, user.email);
         assert_eq!(fetched_user.password, user.password);
-        assert_eq!(fetched_user.is_active, false);
+        assert_eq!(fetched_user.is_active, true);
         assert!(fetched_user.created_at.is_some());
         assert!(fetched_user.updated_at.is_some());
         assert!(fetched_user.deleted_at.is_none());

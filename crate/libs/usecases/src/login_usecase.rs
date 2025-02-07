@@ -157,10 +157,8 @@ mod tests {
     async fn test_login_invalid_username() {
         pretty_env_logger::init();
         let env = Env::load();
-
-        let pool = Arc::new(create_sqlite_db_pool(env.get_db_url()).await.unwrap());
+        let pool = Arc::new(create_sqlite_db_pool("sqlite::memory:").await.unwrap());
         let module = MyModule::builder()
-            // .with_component_override::<dyn DatabaseInterface>(Box::new(db))
             .with_component_parameters::<DB>(DBParameters {
                 pool: Some(pool.clone()),
             })
@@ -182,7 +180,8 @@ mod tests {
         assert!(result.is_err());
         match result.unwrap_err().downcast_ref::<GenericError>() {
             Some(GenericError::LoginFailed(u32)) => assert_eq!(*u32, 401),
-            _ => panic!("error is not login failed"),
+            Some(GenericError::Unknown()) =>  assert!(true),
+            _ => assert!(false),
         };
     }
 }

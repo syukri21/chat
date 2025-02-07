@@ -17,7 +17,7 @@ use http::StatusCode;
 use jwt::JWT;
 use log::{error, info, trace};
 use mail::Mail;
-use persistence::{DatabaseInterface, Env, DB};
+use persistence::{Env, DB};
 use sessions::services::SessionService;
 use shaku::{module, HasComponent};
 use std::collections::HashMap;
@@ -65,9 +65,8 @@ async fn main() {
     // initialize tracing
     tracing_init();
 
-    let module = usecases::utils::setup_module::<WebModule>(WebModule::builder()).await;
-    let db: &dyn DatabaseInterface = module.resolve_ref();
-    db.migrate().await;
+    let env = Env::load();
+    let module = usecases::utils::setup_module::<WebModule>(WebModule::builder(), env).await;
     let login_usecase: Arc<dyn LoginUseCaseInterface> = module.resolve();
     let arc_module = Arc::new(module);
     let debug_state = Arc::new(RwLock::new(DebugState {
@@ -80,7 +79,10 @@ async fn main() {
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
         .route("/update-profile", post(user_detail::update_profile))
-        .route("/upload-profile-picture", post(user_detail::upload_profile_picture))
+        .route(
+            "/upload-profile-picture",
+            post(user_detail::upload_profile_picture),
+        )
         .route("/login", post(login::login));
 
     // This is callback nest routes

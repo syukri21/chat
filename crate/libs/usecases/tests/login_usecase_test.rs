@@ -25,7 +25,7 @@ mod tests {
         pretty_env_logger::init();
         let env = Env::load();
 
-        let pool = Arc::new(create_sqlite_db_pool(env.get_db_url()).await.unwrap());
+        let pool = Arc::new(create_sqlite_db_pool("sqlite::memory:").await.unwrap());
         let module = TestModule::builder()
             .with_component_parameters::<DB>(DBParameters {
                 pool: Some(pool.clone()),
@@ -66,11 +66,12 @@ mod tests {
         let login_usecase: &dyn LoginUseCaseInterface = module.resolve_ref();
         let credential_service: &dyn CredentialServiceInterface = module.resolve_ref();
 
-        let user = User::new(
+        let mut user = User::new(
             String::from("syukri1"),
             String::from("syukrihsb148test@gmail.com"),
             String::from("password8"),
         )?;
+        user.is_active = true;
         user_service.create_user(&user).await?;
         credential_service
             .create_credential(&Credential::new(

@@ -36,17 +36,14 @@ pub async fn setup_module<
     T: shaku::Module + HasComponent<(dyn EnvInterface)> + HasComponent<(dyn DatabaseInterface)>,
 >(
     module_builder: ModuleBuilder<T>,
+    env: Env,
 ) -> T {
-    let env = Env::load();
     let pool = Arc::new(create_sqlite_db_pool(env.get_db_url()).await.unwrap());
     let module = module_builder
-        // .with_component_override::<dyn DatabaseInterface>(Box::new(db))
         .with_component_parameters::<DB>(DBParameters {
             pool: Some(pool.clone()),
         })
         .with_component_override::<dyn EnvInterface>(Box::new(env))
         .build();
-    let db: &dyn DatabaseInterface = module.resolve_ref();
-    db.migrate().await;
     module
 }
