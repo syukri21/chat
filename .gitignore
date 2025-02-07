@@ -5,3 +5,5 @@
 /app.DB*
 
 /Test Results - *
+./crate/application/web/assets/uploads/*
+

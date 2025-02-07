@@ -10,10 +10,28 @@ use usecases::userdetail_usecase::UserDetailUsecase;
 use usecases::RegisterUseCaseInterface;
 
 const SOMETHING_WENT_WRONG: &str = include_str!("../../page/500.html");
+const PROFILE_TEMPLATE: &str = include_str!("../../page/profile.html");
+const CHAT_TEMPLATTE: &str = include_str!("../../page/chat.html");
 
-pub async fn home() -> Html<&'static str> {
-    Html(include_str!("../../page/chat.html"))
+pub async fn chat(
+    user_detail_usecase: Inject<WebModule, dyn UserDetailUsecase>,
+    claim: extract::Extension<AccessClaims>,
+) -> impl IntoResponse {
+    if let Ok(user_info) = user_detail_usecase.get_user_info(&claim.user_id).await {
+        let profile_picture = user_info
+            .user_details
+            .and_then(|details| details.profile_picture)
+            .unwrap_or_else(|| {
+                format!(
+                    "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
+                    user_info.username
+                )
+            });
+        return Html(CHAT_TEMPLATTE.replace("{{profile_picture}}", &profile_picture));
+    }
+    Html(SOMETHING_WENT_WRONG.to_string())
 }
+
 pub async fn login() -> Html<&'static str> {
     Html(include_str!("../../page/login.html"))
 }
@@ -21,7 +39,6 @@ pub async fn signup() -> Html<&'static str> {
     Html(include_str!("../../page/signup.html"))
 }
 
-const PROFILE_TEMPLATE: &str = include_str!("../../page/profile.html");
 pub async fn profile(
     user_detail_usecase: Inject<WebModule, dyn UserDetailUsecase>,
     claim: extract::Extension<AccessClaims>,

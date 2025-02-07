@@ -90,7 +90,7 @@ async fn main() {
     let debug_app = Router::new().route("/active-link", get(debug_handlers::get_activate_link));
 
     let app = Router::new()
-        .route("/", get(page_handlers::home))
+        .route("/", get(page_handlers::chat))
         .route("/login", get(page_handlers::login))
         .route("/signup", get(page_handlers::signup))
         .route("/profile", get(page_handlers::profile))
