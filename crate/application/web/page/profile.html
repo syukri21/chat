@@ -1,26 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layout" %}
+{% block title %}{{ super() }} | {{ title }} {% endblock %}
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Profile Management</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-  <script src="https://unpkg.com/htmx-ext-response-targets@2.0.0/response-targets.js"></script>
-  <style>
-    .loading {
-      display: none;
-    }
+{% block body %}
 
-    .loading.htmx-request {
-      display: inline;
-    }
-  </style>
-</head>
-
-
-<body class="bg-blue-50 h-screen flex items-center justify-center" hx-ext="response-targets">
+<div class="bg-blue-50 h-screen flex items-center justify-center" hx-ext="response-targets">
   <div class="w-full max-w-3xl bg-white shadow-lg rounded-lg overflow-hidden mt-4">
     <!-- Header -->
     <div class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
@@ -33,9 +16,15 @@
 
       <div class="mb-8 text-center">
 
-        <form id="upload-form" hx-post="/htmx/upload-profile-picture" hx-target="#update-success"
-          hx-encoding="multipart/form-data" hx-indicator="#loading-indicator" hx-swap="outerHTML"
-          class="text-center flex justify-center flex-col items-center">
+        <form id="upload-form" 
+              hx-post="/htmx/upload-profile-picture" 
+              hx-target="#update-success"
+              hx-encoding="multipart/form-data" 
+              hx-indicator="#loading-indicator" 
+              hx-swap="outerHTML" 
+              data-nconfirm="true"
+              data-question="Apakah anda yakin ingin mengganti foto profile?" 
+              class="text-center flex justify-center flex-col items-center">
 
           <div class="relative inline-block">
             <!-- Profile Picture Preview -->
@@ -58,7 +47,7 @@
             <input type="file" id="profile-upload" name="profile_picture" class="hidden" accept="image/*">
           </div>
 
-          <!-- Upload Button with HTMX -->
+          <!-- Upload utton with HTMX -->
           <button type="submit" hx-disabled-elt="this"
             class="mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
             <span id="loading-indicator" class="loading mr-2">
@@ -77,7 +66,13 @@
 
       <div class="hidden" id="update-success"></div>
 
-      <form id="profile-form" hx-post="/htmx/update-profile" hx-target="#update-success" hx-swap="outerHTML">
+      <form 
+          id="profile-form" 
+          data-nconfirm="true"
+          data-question="Apakah Anda yakin ingin memperbarui profil Anda?"
+          hx-post="/htmx/update-profile" 
+          hx-target="#update-success" 
+          hx-swap="outerHTML">
         <div class="space-y-4">
           <div class="flex space-x-4">
             <!-- First Name -->
@@ -133,7 +128,7 @@
           <div id="update-error" class="text-red-600 text-sm"></div>
 
           <!-- Submit Button -->
-          <button type="submit"
+          <button type="submit" hx-confirm="Apakah anda yakin ingin menyimpan perubahan ini ?"
             class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
             Save Changes
           </button>
@@ -156,6 +151,6 @@
     });
 
   </script>
-</body>
+</div>
 
-</html>
+{% endblock %}

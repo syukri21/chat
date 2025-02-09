@@ -16,6 +16,7 @@ anyhow.workspace = true
 chrono.workspace = true
 log = "0.4.22"
 http = "1.2.0"
+minijinja = "2.3.1"
 
 axum = { version = "0.8.1", features = ["ws"] }
 axum-extra = { version = "0.10.0", features = ["typed-header", "cookie", "multipart"] }
@@ -34,3 +35,8 @@ crypto = { path = "../../libs/clients/crypto" }
 jwt = { path = "../../libs/clients/jwt" }
 sessions = { path = "../../libs/domain/sessions" }
 user_details = { path = "../../libs/domain/user_details" }
+
+[jinja-lsp]
+templates = "./page"
+backend = ["./src"]
+lang = "rust"

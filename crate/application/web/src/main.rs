@@ -10,6 +10,7 @@ use axum::{extract, middleware, Router};
 use axum_client_ip::SecureClientIpSource;
 use axum_extra::extract::CookieJar;
 use chats::chat_services::ChatService;
+use commons::templates::{JinjaTemplate, JinjaTemplateImpl};
 use credentials::credential_services::CredentialService;
 use crypto::Crypto;
 use htmx_handlers::{chat, user_detail};
@@ -48,7 +49,7 @@ mod utils;
 
 module! {
      WebModule {
-        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto , UserDetailServiceImpl, UserDetailUsecaseImpl],
+        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto , UserDetailServiceImpl, UserDetailUsecaseImpl, JinjaTemplateImpl],
         providers = []
     }
 }
@@ -64,9 +65,10 @@ type SharedDebugState = Arc<RwLock<DebugState>>;
 async fn main() {
     // initialize tracing
     tracing_init();
-
     let env = Env::load();
-    let module = usecases::utils::setup_module::<WebModule>(WebModule::builder(), env).await;
+    let module_builder = WebModule::builder()
+        .with_component_override::<dyn JinjaTemplate>(Box::new(JinjaTemplateImpl::default()));
+    let module = usecases::utils::setup_module::<WebModule>(module_builder, env).await;
     let login_usecase: Arc<dyn LoginUseCaseInterface> = module.resolve();
     let arc_module = Arc::new(module);
     let debug_state = Arc::new(RwLock::new(DebugState {
@@ -97,7 +99,9 @@ async fn main() {
         .route("/", get(page_handlers::chat))
         .route("/login", get(page_handlers::login))
         .route("/signup", get(page_handlers::signup))
-        .route("/profile", get(page_handlers::profile))
+        .route("/profile", get(page_handlers::profile));
+
+    let app = app
         .nest("/htmx", htmx_app)
         .nest("/callback", callback_app)
         .nest("/debug", debug_app)
