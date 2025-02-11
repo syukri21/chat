@@ -32,7 +32,6 @@ pub trait UserDetailUsecase: Interface {
     async fn upload_profile_picture(
         &self,
         user_id: &str,
-        //image: &Vec<u8>,
         image: &[u8],
     ) -> anyhow::Result<String>;
 }

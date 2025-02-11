@@ -1,0 +1,34 @@
+[package]
+name = "fakers"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+async-trait.workspace = true
+shaku.workspace = true
+pretty_env_logger.workspace = true
+tracing.workspace = true
+futures = "0.3.31"
+dotenv.workspace = true
+log.workspace = true
+serde.workspace = true
+env_logger = "0.11.6"
+infer.workspace = true
+fake = { version = "3.0.1", features = ["derive"] }
+
+persistence = { path = "../persistence" }
+users = { path = "../domain/users" }
+sessions = { path = "../domain/sessions" }
+credentials = { path = "../domain/credentials" }
+chats = { path = "../domain/chats" }
+commons = { path = "../commons" }
+mail = { path = "../clients/mail" }
+crypto = { path = "../clients/crypto" }
+jwt = { path = "../clients/jwt" }
+user_details = { path = "../domain/user_details" }
+usecases = {path = "../usecases"}

@@ -12,7 +12,8 @@ members = [
     "crate/libs/domain/chats",
     "crate/application/web",
     "crate/libs/domain/sessions",
-    "crate/libs/domain/user_details"]
+    "crate/libs/domain/user_details",
+    "crate/libs/fakers"]
 
 
 [workspace.dependencies]

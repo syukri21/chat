@@ -35,6 +35,7 @@ crypto = { path = "../../libs/clients/crypto" }
 jwt = { path = "../../libs/clients/jwt" }
 sessions = { path = "../../libs/domain/sessions" }
 user_details = { path = "../../libs/domain/user_details" }
+fakers = { path = "../../libs/fakers" }
 
 [jinja-lsp]
 templates = "./page"

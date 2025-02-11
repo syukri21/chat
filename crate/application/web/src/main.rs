@@ -10,6 +10,7 @@ use chats::chat_services::ChatService;
 use commons::templates::{JinjaTemplate, JinjaTemplateImpl};
 use credentials::credential_services::CredentialService;
 use crypto::Crypto;
+use fakers::{FakerImpl, FakerInnerImpl};
 use htmx_handlers::{chat, user_detail};
 use jwt::JWT;
 use log::{error, info};
@@ -47,7 +48,7 @@ mod utils;
 
 module! {
      WebModule {
-        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto , UserDetailServiceImpl, UserDetailUsecaseImpl, JinjaTemplateImpl],
+        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto , UserDetailServiceImpl, UserDetailUsecaseImpl, JinjaTemplateImpl, FakerInnerImpl, FakerImpl],
         providers = []
     }
 }
