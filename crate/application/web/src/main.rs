@@ -1,23 +1,20 @@
-use crate::commons::constants::{DEBUG_PAGES, PUBLIC_PAGES};
 use crate::htmx_handlers::{login, register};
 use axum::body::Bytes;
-use axum::extract::{MatchedPath, State};
+use axum::extract::MatchedPath;
 use axum::http::{HeaderMap, Request};
-use axum::middleware::Next;
 use axum::response::Response;
 use axum::routing::{get, post};
-use axum::{extract, middleware, Router};
+use axum::{middleware, Router};
 use axum_client_ip::SecureClientIpSource;
-use axum_extra::extract::CookieJar;
 use chats::chat_services::ChatService;
 use commons::templates::{JinjaTemplate, JinjaTemplateImpl};
 use credentials::credential_services::CredentialService;
 use crypto::Crypto;
 use htmx_handlers::{chat, user_detail};
-use http::StatusCode;
 use jwt::JWT;
-use log::{error, info, trace};
+use log::{error, info};
 use mail::Mail;
+use middlewares::auth::auth;
 use persistence::{Env, DB};
 use sessions::services::SessionService;
 use shaku::{module, HasComponent};
@@ -44,6 +41,7 @@ use users::user_services::UserService;
 mod commons;
 mod debug_handlers;
 mod htmx_handlers;
+mod middlewares;
 mod page_handlers;
 mod utils;
 
@@ -194,55 +192,6 @@ fn with_tracing(app: Router) -> Router {
                 },
             ),
     )
-}
-
-fn check_path(current_path: &str) -> bool {
-    let is_path = |path: &&str| {
-        if path.contains("*") {
-            let path = path.replace("*", "");
-            return current_path.starts_with(&path);
-        };
-        *path == current_path
-    };
-    let is_public = PUBLIC_PAGES.iter().any(is_path);
-    let is_debug = DEBUG_PAGES.iter().any(is_path);
-    is_debug || is_public
-}
-async fn auth(
-    State(login_usecase): State<Arc<dyn LoginUseCaseInterface>>,
-    cookie_jar: CookieJar,
-    mut req: extract::Request,
-    next: Next,
-) -> Result<Response, StatusCode> {
-    let current_path = req.uri().path();
-
-    if check_path(current_path) {
-        return Ok(next.run(req).await);
-    }
-
-    let auth_header = cookie_jar
-        .get("token")
-        .ok_or_else(|| {
-            error!("No auth token for");
-            StatusCode::UNAUTHORIZED
-        })
-        .map_err(|e1| {
-            error!("No auth token {}", e1);
-            StatusCode::UNAUTHORIZED
-        })?
-        .value();
-
-    trace!("Auth header: {}", auth_header);
-    let claims = login_usecase
-        .authorize_current_user(auth_header)
-        .await
-        .map_err(|e| {
-            error!("Error when authorizing current user: {}", e);
-            StatusCode::UNAUTHORIZED
-        })?;
-
-    req.extensions_mut().insert(claims);
-    Ok(next.run(req).await)
 }
 
 async fn shutdown_signal() {
