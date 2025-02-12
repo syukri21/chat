@@ -79,6 +79,10 @@ async fn main() {
     let htmx_app = Router::new()
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
+        .route(
+            "/invite-private-chat",
+            post(chat::invite_private_chat_usecase),
+        )
         .route("/update-profile", post(user_detail::update_profile))
         .route(
             "/upload-profile-picture",
