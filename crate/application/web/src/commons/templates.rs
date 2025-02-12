@@ -4,6 +4,7 @@ use shaku::{Component, Interface};
 const CHAT: &str = include_str!("../../page/chat.html");
 const SOMETHING_WENT_WRONG: &str = include_str!("../../page/500.html");
 const PROFILE: &str = include_str!("../../page/profile.html");
+const USER_INFO: &str = include_str!("../../page/htmx/user_info.html");
 
 #[derive(Component)]
 #[shaku(interface = JinjaTemplate)]
@@ -28,6 +29,7 @@ impl Default for JinjaTemplateImpl {
         env.add_template("something-went-wrong", SOMETHING_WENT_WRONG)
             .unwrap();
         env.add_template("profile", PROFILE).unwrap();
+        env.add_template("htmx-user-info", USER_INFO).unwrap();
 
         JinjaTemplateImpl { env }
     }
@@ -36,6 +38,7 @@ impl Default for JinjaTemplateImpl {
 pub trait JinjaTemplate: Interface {
     fn env(&self) -> &Environment<'static>;
     fn something_went_wrong_page(&self) -> String;
+    fn htmx_user_info(&self, user_info: &users::user::UserInfo) -> String;
 }
 
 impl JinjaTemplate for JinjaTemplateImpl {
@@ -49,6 +52,19 @@ impl JinjaTemplate for JinjaTemplateImpl {
             .unwrap()
             .render(context! {
                 title => "500 - Internal Server Error"
+            })
+            .unwrap()
+    }
+
+    fn htmx_user_info(&self, user_info: &users::user::UserInfo) -> String {
+        let profile_picture = format!("https://ui-avatars.com/api/?name={}&background=random&rounded=true", user_info.username);
+        self.env
+            .get_template("htmx-user-info")
+            .unwrap()
+            .render(context! {
+                profile_picture => profile_picture,
+                username => user_info.username,
+                id => user_info.id.to_string(),
             })
             .unwrap()
     }

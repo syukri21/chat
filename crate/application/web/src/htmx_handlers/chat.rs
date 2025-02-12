@@ -7,17 +7,8 @@ use http::StatusCode;
 use shaku_axum::Inject;
 use tracing::error;
 use usecases::InvitePrivateChatUsecaseInterface;
-use users::user::UserInfo;
 
-use crate::{utils::render_error_alert, WebModule};
-
-const TEMPLATE: &str = include_str!("../../page/htmx/user_info.html");
-
-fn build_user_info(user_info: &UserInfo) -> String {
-    TEMPLATE
-        .replace("{0}", user_info.username.as_str())
-        .replace("{1}", user_info.id.to_string().as_str()).to_string()
-}
+use crate::{commons::templates::JinjaTemplate, utils::render_error_alert, WebModule};
 
 #[derive(serde::Deserialize)]
 pub struct FindUserRequest {
@@ -26,6 +17,7 @@ pub struct FindUserRequest {
 
 pub async fn find_user_info_list(
     invite_private_chat_usecase: Inject<WebModule, dyn InvitePrivateChatUsecaseInterface>,
+    template: Inject<WebModule, dyn JinjaTemplate>,
     Query(query): Query<FindUserRequest>,
 ) -> impl IntoResponse {
     match invite_private_chat_usecase
@@ -33,8 +25,10 @@ pub async fn find_user_info_list(
         .await
     {
         Ok(response) => {
-            let response: Vec<String> =
-                response.iter().map(build_user_info).collect();
+            let response: Vec<String> = response
+                .iter()
+                .map(|user| template.htmx_user_info(user))
+                .collect();
             Response::builder()
                 .status(StatusCode::OK)
                 .body(response.join(""))
