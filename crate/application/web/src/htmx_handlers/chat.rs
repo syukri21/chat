@@ -10,6 +10,7 @@ use axum::{
 use commons::generic_errors::GenericError;
 use http::StatusCode;
 use jwt::AccessClaims;
+use minijinja::context;
 use shaku_axum::Inject;
 use tracing::error;
 use usecases::InvitePrivateChatUsecaseInterface;
@@ -48,9 +49,17 @@ pub struct InvitePrivateChatRequest {
 pub async fn invite_private_chat_usecase(
     invite_private_chat_usecase: Inject<WebModule, dyn InvitePrivateChatUsecaseInterface>,
     claim: Extension<AccessClaims>,
+    template: Inject<WebModule, dyn JinjaTemplate>,
     Json(payload): Json<InvitePrivateChatRequest>,
 ) -> impl IntoResponse {
     let user_id = Uuid::from_str(&claim.user_id);
+    let chat_window = template
+        .env()
+        .get_template("htmx-chat-window")
+        .unwrap()
+        .render(context! {})
+        .unwrap();
+
     invite_private_chat_usecase
         .invite_private_chat(&usecases::InvitePrivateChatRequest {
             user_id: user_id.unwrap(),
@@ -58,7 +67,7 @@ pub async fn invite_private_chat_usecase(
         })
         .await
         .map_err(|e| error_builder(e, "invite_private_chat_usecase"))
-        .map(|chat_id| ok_builder(chat_id.to_string()))
+        .map(|_| ok_builder(chat_window))
 }
 
 fn error_builder(e: anyhow::Error, key: &str) -> http::Response<axum::body::Body> {

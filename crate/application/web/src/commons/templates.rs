@@ -5,6 +5,7 @@ const CHAT: &str = include_str!("../../page/chat.html");
 const SOMETHING_WENT_WRONG: &str = include_str!("../../page/500.html");
 const PROFILE: &str = include_str!("../../page/profile.html");
 const USER_INFO: &str = include_str!("../../page/htmx/user_info.html");
+const CHAT_WINDOW: &str = include_str!("../../page/htmx/chat_window.html");
 
 #[derive(Component)]
 #[shaku(interface = JinjaTemplate)]
@@ -30,6 +31,7 @@ impl Default for JinjaTemplateImpl {
             .unwrap();
         env.add_template("profile", PROFILE).unwrap();
         env.add_template("htmx-user-info", USER_INFO).unwrap();
+        env.add_template("htmx-chat-window", CHAT_WINDOW).unwrap();
 
         JinjaTemplateImpl { env }
     }
