@@ -3,6 +3,7 @@ use async_trait::async_trait;
 use log::info;
 use persistence::DatabaseInterface;
 use shaku::{Component, Interface};
+use sqlx::sqlite::SqliteRow;
 use sqlx::{Error, Row, SqliteConnection};
 use std::str::FromStr;
 use std::sync::Arc;
@@ -13,6 +14,7 @@ pub trait ChatServiceInterface: Interface {
     async fn initiate_private_chat(&self, user1_id: &str, user2_id: &str) -> anyhow::Result<Uuid>;
     async fn get_user_chat_list(&self, user_id: &str) -> anyhow::Result<Vec<ChatPreview>>;
     async fn get_chat_members(&self, chat_id: &str) -> anyhow::Result<Vec<ChatMember>>;
+    async fn is_chat_exist(&self, user1_id: &str, user2_id: &str) -> anyhow::Result<Option<Chat>>;
 }
 
 #[derive(Component)]
@@ -69,6 +71,41 @@ impl ChatServiceInterface for ChatService {
             });
         }
         Ok(members)
+    }
+
+    async fn is_chat_exist(&self, user1_id: &str, user2_id: &str) -> anyhow::Result<Option<Chat>> {
+        let mut pool = self.db.get_pool().acquire().await?;
+        let chat = Chat::from_user1and2(user1_id, user2_id);
+        let query = r#"
+        SELECT
+            id,
+            name,
+            is_group
+        FROM chats
+        WHERE
+            name in (?, ?) 
+        "#;
+
+        let all_names = chat.get_all_possible_names();
+        let rows = sqlx::query(query)
+            .bind(all_names.get(0).unwrap())
+            .bind(all_names.get(1).unwrap())
+            .fetch_optional(&mut *pool)
+            .await?;
+
+        let rows: SqliteRow = match rows {
+            Some(row) => row,
+            None => return Ok(None),
+        };
+
+        let chat = Chat {
+            id: rows.try_get::<String, _>("id")?.parse()?,
+            name: rows.try_get::<String, _>("name")?,
+            is_group: rows.try_get::<bool, _>("is_group")?,
+            created_at: None,
+            updated_at: None,
+        };
+        Ok(Some(chat))
     }
 }
 

@@ -1,18 +1,19 @@
 use std::str::FromStr;
 
+use crate::commons::templates::JinjaTemplate;
+use crate::{utils::render_error_alert, WebModule};
 use axum::{
     extract::Query,
     response::{IntoResponse, Response},
-    Json,
+    Extension, Json,
 };
 use commons::generic_errors::GenericError;
 use http::StatusCode;
+use jwt::AccessClaims;
 use shaku_axum::Inject;
 use tracing::error;
 use usecases::InvitePrivateChatUsecaseInterface;
 use uuid::Uuid;
-use crate::{utils::render_error_alert, WebModule};
-use crate::commons::templates::JinjaTemplate;
 
 #[derive(serde::Deserialize)]
 pub struct FindUserRequest {
@@ -41,18 +42,18 @@ pub async fn find_user_info_list(
 
 #[derive(serde::Deserialize, Debug)]
 pub struct InvitePrivateChatRequest {
-    pub user_id: String,
     pub user_email_or_username: String,
 }
 
 pub async fn invite_private_chat_usecase(
     invite_private_chat_usecase: Inject<WebModule, dyn InvitePrivateChatUsecaseInterface>,
+    claim: Extension<AccessClaims>,
     Json(payload): Json<InvitePrivateChatRequest>,
 ) -> impl IntoResponse {
-    let user_id = Uuid::from_str(&payload.user_id).unwrap();
+    let user_id = Uuid::from_str(&claim.user_id);
     invite_private_chat_usecase
         .invite_private_chat(&usecases::InvitePrivateChatRequest {
-            user_id,
+            user_id: user_id.unwrap(),
             user_email_or_username: payload.user_email_or_username,
         })
         .await

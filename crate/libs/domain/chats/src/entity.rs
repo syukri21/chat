@@ -10,11 +10,20 @@ pub struct Chat {
 }
 
 impl Chat {
+    pub fn get_all_possible_names(&self) -> Vec<String> {
+        let first_name = self.name.split("_").next().unwrap().to_string();
+        let second_name = self.name.split("_").last().unwrap().to_string();
+        let all_names = vec![
+            format!("{}_{}", second_name, first_name),
+            format!("{}_{}", first_name, second_name),
+        ];
+        return all_names;
+    }
     pub fn from_user1and2(user_1_id: &str, user_2_id: &str) -> Self {
         let chat = Chat::default();
         Self {
             id: chat.id,
-            name: format!("{}-{}", user_1_id, user_2_id),
+            name: format!("{}_{}", user_1_id, user_2_id),
             is_group: chat.is_group,
             created_at: chat.created_at,
             updated_at: chat.updated_at,

@@ -12,7 +12,7 @@ pub struct InvitePrivateChatRequest {
     pub user_email_or_username: String,
 }
 #[async_trait::async_trait]
-pub trait InvitePrivateChatUsecaseInterface: Interface + Send + Sync {
+pub trait InvitePrivateChatUsecaseInterface: Interface {
     async fn invite_private_chat(&self, request: &InvitePrivateChatRequest)
         -> anyhow::Result<Uuid>;
     async fn find_user_info_list(&self, query: &str) -> anyhow::Result<Vec<UserInfo>>;
@@ -38,6 +38,28 @@ impl InvitePrivateChatUsecaseInterface for InvitePrivateChatUsecase {
             .get_user_by_username(request.user_email_or_username.as_str())
             .await
             .map_err(GenericError::user_not_found)?;
+
+        if target_user.id == request.user_id {
+            error!("Cannot invite yourself request={} target={}", request.user_id, target_user.id);
+            return Err(GenericError::user_not_found(anyhow::anyhow!(
+                "Cannot invite yourself",
+            )));
+        }
+
+        let value = self
+            .chats_service
+            .is_chat_exist(
+                request.user_id.to_string().as_str(),
+                target_user.id.to_string().as_str(),
+            )
+            .await
+            .map_err(|e| GenericError::unknown(e))?;
+
+        if value.is_some() {
+            let id = value.unwrap().id;
+            info!("chat already exist with id: {}", id);
+            return Ok(id);
+        }
 
         info!("target user found with id: {}", target_user.id);
         self.chats_service
