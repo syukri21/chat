@@ -1,4 +1,3 @@
-use crate::htmx_handlers::{login, register};
 use axum::body::Bytes;
 use axum::extract::MatchedPath;
 use axum::http::{HeaderMap, Request};
@@ -8,6 +7,7 @@ use axum::{middleware, Router};
 use axum_client_ip::SecureClientIpSource;
 use chats::chat_services::ChatService;
 use commons::templates::{JinjaTemplate, JinjaTemplateImpl};
+use crate::htmx_handlers::{login, register};
 use credentials::credential_services::CredentialService;
 use crypto::Crypto;
 use fakers::{FakerImpl, FakerInnerImpl};
@@ -48,7 +48,26 @@ mod utils;
 
 module! {
      WebModule {
-        components = [LoginUseCase, InvitePrivateChatUsecase, RegisterUseCase, SessionService, UserService, ChatService, CredentialService, Env, DB, JWT, Mail, Crypto , UserDetailServiceImpl, UserDetailUsecaseImpl, JinjaTemplateImpl, FakerInnerImpl, FakerImpl],
+        components = [
+            ChatService,
+            CredentialService,
+            Crypto ,
+            DB,
+            Env,
+            FakerImpl,
+            FakerInnerImpl,
+            InvitePrivateChatUsecase,
+            JWT,
+            JinjaTemplateImpl,
+            LoginUseCase,
+            Mail,
+            RegisterUseCase,
+            SessionService,
+            UserDetailServiceImpl,
+            UserDetailUsecaseImpl,
+            UserService,
+        ],
+
         providers = []
     }
 }
@@ -79,9 +98,15 @@ async fn main() {
     let htmx_app = Router::new()
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
-        .route("/invite-private-chat", post(chat::invite_private_chat_usecase))
+        .route(
+            "/invite-private-chat",
+            post(chat::invite_private_chat_usecase),
+        )
         .route("/update-profile", post(user_detail::update_profile))
-        .route( "/upload-profile-picture", post(user_detail::upload_profile_picture))
+        .route(
+            "/upload-profile-picture",
+            post(user_detail::upload_profile_picture),
+        )
         .route("/login", post(login::login));
 
     // This is callback nest routes
