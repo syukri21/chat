@@ -1,0 +1,14 @@
+<div 
+  class="flex items-center space-x-3" 
+  id="chatHeader" 
+  hx-get="/htmx/chat-header?user_id={{user_id}}"
+  hx-trigger="load delay:1500ms"
+  hx-swap-oob="true"
+  hx-swap="outerHTML"
+>
+  <img src="{{profile_picture}}" alt="Profile" class="w-10 h-10 rounded-full">
+  <div>
+    <h1 class="text-lg font-semibold">{{name}}</h1>
+    <p class="text-xs text-gray-200">{{status_online}}</p>
+  </div>
+</div>

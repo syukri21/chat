@@ -1,3 +1,4 @@
+use crate::htmx_handlers::{login, register};
 use axum::body::Bytes;
 use axum::extract::MatchedPath;
 use axum::http::{HeaderMap, Request};
@@ -7,7 +8,6 @@ use axum::{middleware, Router};
 use axum_client_ip::SecureClientIpSource;
 use chats::chat_services::ChatService;
 use commons::templates::{JinjaTemplate, JinjaTemplateImpl};
-use crate::htmx_handlers::{login, register};
 use credentials::credential_services::CredentialService;
 use crypto::Crypto;
 use fakers::{FakerImpl, FakerInnerImpl};
@@ -98,6 +98,7 @@ async fn main() {
     let htmx_app = Router::new()
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
+        .route("/chat-header", get(chat::chat_header))
         .route(
             "/invite-private-chat",
             post(chat::invite_private_chat_usecase),

@@ -16,6 +16,39 @@ pub struct UserInfo {
     pub user_details: Option<UserDetail>,
 }
 
+impl UserInfo {
+    pub fn new(username: String, email: String, user_details: Option<UserDetail>) -> Self {
+        Self {
+            username,
+            email,
+            user_details,
+        }
+    }
+
+    pub fn get_profile_picture(&self) -> String {
+        self.user_details
+            .as_ref()
+            .and_then(|details| details.profile_picture.clone())
+            .unwrap_or_else(|| self.get_default_profile_picture())
+    }
+
+    fn get_default_profile_picture(&self) -> String {
+        format!(
+            "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
+            self.get_full_name()
+        )
+    }
+
+    pub fn get_full_name(&self) -> String {
+        self.user_details
+            .as_ref()
+            .and_then(|details| {
+                return Some(format!("{} {}", details.first_name, details.last_name));
+            })
+            .unwrap_or_else(|| self.username.clone())
+    }
+}
+
 #[derive(Component)]
 #[shaku(interface = UserDetailUsecase)]
 pub struct UserDetailUsecaseImpl {
@@ -29,11 +62,7 @@ pub struct UserDetailUsecaseImpl {
 pub trait UserDetailUsecase: Interface {
     async fn update_profile(&self, user_detail: &UserDetail) -> anyhow::Result<()>;
     async fn get_user_info(&self, user_id: &str) -> anyhow::Result<UserInfo>;
-    async fn upload_profile_picture(
-        &self,
-        user_id: &str,
-        image: &[u8],
-    ) -> anyhow::Result<String>;
+    async fn upload_profile_picture(&self, user_id: &str, image: &[u8]) -> anyhow::Result<String>;
 }
 
 #[async_trait]
@@ -66,7 +95,6 @@ impl UserDetailUsecase for UserDetailUsecaseImpl {
     }
 
     async fn upload_profile_picture(&self, user_id: &str, image: &[u8]) -> anyhow::Result<String> {
-
         // Validate the file type
         let infer = Infer::new();
         if !infer.is_image(image) {

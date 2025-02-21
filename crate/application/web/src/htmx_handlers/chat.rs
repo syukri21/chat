@@ -13,6 +13,7 @@ use jwt::AccessClaims;
 use minijinja::context;
 use shaku_axum::Inject;
 use tracing::error;
+use usecases::userdetail_usecase::UserDetailUsecase;
 use usecases::InvitePrivateChatUsecaseInterface;
 use uuid::Uuid;
 
@@ -67,7 +68,28 @@ pub async fn invite_private_chat_usecase(
         })
         .await
         .map_err(|e| error_builder(e, "invite_private_chat_usecase"))
-        .map(|_| ok_builder(chat_window))
+        .map(|val| {
+            let htmx_chat_header =
+                template.htmx_chat_header(val.friend_id.to_string().as_str(), val.friend_user_info);
+            ok_builder([chat_window, htmx_chat_header].join(""))
+        })
+}
+
+#[derive(serde::Deserialize)]
+pub struct ChatHeaderRequest {
+    pub user_id: String,
+}
+
+pub async fn chat_header(
+    user_detail_usecase: Inject<WebModule, dyn UserDetailUsecase>,
+    template: Inject<WebModule, dyn JinjaTemplate>,
+    Query(payload): Query<ChatHeaderRequest>,
+) -> impl IntoResponse {
+    user_detail_usecase
+        .get_user_info(payload.user_id.as_str())
+        .await
+        .map_err(|e| error_builder(e, "invite_private_chat_usecase"))
+        .map(|user_info| ok_builder(template.htmx_chat_header(payload.user_id.as_str(), user_info)))
 }
 
 fn error_builder(e: anyhow::Error, key: &str) -> http::Response<axum::body::Body> {
