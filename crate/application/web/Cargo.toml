@@ -4,40 +4,34 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio.workspace = true
-futures.workspace = true
-tracing.workspace = true
-tracing-subscriber.workspace = true
-uuid.workspace = true
-serde.workspace = true
-shaku.workspace = true
-shaku_axum = "0.6.0"
 anyhow.workspace = true
 chrono.workspace = true
-log = "0.4.22"
-http = "1.2.0"
-minijinja = "2.3.1"
+futures.workspace = true
+serde.workspace = true
+shaku.workspace = true
+tokio.workspace = true
+tracing-subscriber.workspace = true
+tracing.workspace = true
+uuid.workspace = true
 
 axum = { version = "0.8.1", features = ["ws"] }
-axum-extra = { version = "0.10.0", features = ["typed-header", "cookie", "multipart"] }
 axum-client-ip = "0.7.0"
-
+axum-extra = { version = "0.10.0", features = ["typed-header", "cookie", "multipart"] }
+http = "1.2.0"
+log = "0.4.22"
+minijinja = "2.3.1"
+shaku_axum = "0.6.0"
 tower-http = { version = "0.6.1", features = ["trace", "fs", "add-extension"] }
 
-usecases = { path = "../../libs/usecases" }
-persistence = { path = "../../libs/persistence" }
-users = { path = "../../libs/domain/users" }
-credentials = { path = "../../libs/domain/credentials" }
 chats = { path = "../../libs/domain/chats" }
 commons = { path = "../../libs/commons" }
-mail = { path = "../../libs/clients/mail" }
+credentials = { path = "../../libs/domain/credentials" }
 crypto = { path = "../../libs/clients/crypto" }
-jwt = { path = "../../libs/clients/jwt" }
-sessions = { path = "../../libs/domain/sessions" }
-user_details = { path = "../../libs/domain/user_details" }
 fakers = { path = "../../libs/fakers" }
-
-[jinja-lsp]
-templates = "./page"
-backend = ["./src"]
-lang = "rust"
+jwt = { path = "../../libs/clients/jwt" }
+mail = { path = "../../libs/clients/mail" }
+persistence = { path = "../../libs/persistence" }
+sessions = { path = "../../libs/domain/sessions" }
+usecases = { path = "../../libs/usecases" }
+user_details = { path = "../../libs/domain/user_details" }
+users = { path = "../../libs/domain/users" }
