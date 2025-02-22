@@ -436,6 +436,7 @@ dependencies = [
  "persistence",
  "shaku",
  "sqlx",
+ "tokio",
  "uuid",
 ]
 

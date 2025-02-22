@@ -10,7 +10,6 @@ use axum::{
 use commons::generic_errors::GenericError;
 use http::StatusCode;
 use jwt::AccessClaims;
-use minijinja::context;
 use shaku_axum::Inject;
 use tracing::error;
 use usecases::userdetail_usecase::UserDetailUsecase;
@@ -54,13 +53,6 @@ pub async fn invite_private_chat_usecase(
     Json(payload): Json<InvitePrivateChatRequest>,
 ) -> impl IntoResponse {
     let user_id = Uuid::from_str(&claim.user_id);
-    let chat_window = template
-        .env()
-        .get_template("htmx-chat-window")
-        .unwrap()
-        .render(context! {})
-        .unwrap();
-
     invite_private_chat_usecase
         .invite_private_chat(&usecases::InvitePrivateChatRequest {
             user_id: user_id.unwrap(),
@@ -70,9 +62,10 @@ pub async fn invite_private_chat_usecase(
         .map_err(|e| error_builder(e, "invite_private_chat_usecase"))
         .map(|val| {
             let user_info = Box::new(val.friend_user_info);
-            let htmx_chat_header =
-                template.htmx_chat_header(val.friend_id.to_string().as_str(), user_info);
-            ok_builder([chat_window, htmx_chat_header].join(""))
+            let friend_id = val.friend_id.to_string();
+            let htmx_chat_header = template.htmx_chat_header(&friend_id, user_info);
+            let htmx_chat_box = template.htmx_chat_box(&val.chat_messages);
+            ok_builder([htmx_chat_box, htmx_chat_header].join(""))
         })
 }
 

@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-uuid.workspace = true
-chrono.workspace = true
-async-trait.workspace = true
 anyhow.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+log.workspace = true
 shaku.workspace = true
 sqlx.workspace = true
-log.workspace = true
-
+tokio.workspace = true
+uuid.workspace = true
 
 persistence = { path = "../../persistence" }

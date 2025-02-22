@@ -1,3 +1,4 @@
+use chats::entity::ChatMessages;
 use minijinja::{context, Environment};
 use shaku::{Component, Interface};
 use users::user::UserInfoDisplay;
@@ -29,9 +30,11 @@ impl Default for JinjaTemplateImpl {
         // htmx
         const USER_INFO: &str = include_str!("../../page/htmx/user_info.html");
         const CHAT_WINDOW: &str = include_str!("../../page/htmx/chat_window.html");
+        const CHAT_WINDOW_EMPTY: &str = include_str!("../../page/htmx/chat_window_empty.html");
         const CHAT_HEADER: &str = include_str!("../../page/htmx/chat_header.html");
         env.add_template("htmx-user-info", USER_INFO).unwrap();
         env.add_template("htmx-chat-window", CHAT_WINDOW).unwrap();
+        env.add_template("htmx-chat-window-empty", CHAT_WINDOW_EMPTY).unwrap();
         env.add_template("htmx-chat-header", CHAT_HEADER).unwrap();
 
         JinjaTemplateImpl { env }
@@ -43,6 +46,7 @@ pub trait JinjaTemplate: Interface {
     fn something_went_wrong_page(&self) -> String;
     fn htmx_user_info(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String;
     fn htmx_chat_header(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String;
+    fn htmx_chat_box(&self, chat_messages: &Option<ChatMessages>) -> String;
 }
 
 impl JinjaTemplate for JinjaTemplateImpl {
@@ -85,5 +89,21 @@ impl JinjaTemplate for JinjaTemplateImpl {
                 status_online => "online"
             })
             .unwrap();
+    }
+
+    fn htmx_chat_box(&self, chat_messages: &Option<ChatMessages>) -> String {
+        if chat_messages.is_none() {
+            return self
+                .env
+                .get_template("htmx-chat-window-empty")
+                .unwrap()
+                .render(context! {})
+                .unwrap();
+        }
+        self.env
+            .get_template("htmx-chat-window")
+            .unwrap()
+            .render(context! {})
+            .unwrap()
     }
 }

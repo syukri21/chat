@@ -1,4 +1,4 @@
-use chats::chat_services::ChatServiceInterface;
+use chats::{chat_services::ChatServiceInterface, entity::ChatMessages};
 use commons::generic_errors::GenericError;
 use log::{error, info};
 use shaku::{Component, Interface};
@@ -14,6 +14,7 @@ pub struct InvitePrivateChatRequest {
     pub user_id: Uuid,
     pub user_email_or_username: String,
 }
+
 #[async_trait::async_trait]
 pub trait InvitePrivateChatUsecaseInterface: Interface {
     async fn invite_private_chat(
@@ -39,6 +40,8 @@ pub struct InvitePrivateChatResponse {
     pub chat_id: Uuid,
     pub friend_id: Uuid,
     pub friend_user_info: userdetail_usecase::UserInfo,
+    pub chat_messages: Option<ChatMessages>,
+    //pub chat_list: Vec<String>,
 }
 
 impl ToString for InvitePrivateChatResponse {
@@ -48,6 +51,12 @@ impl ToString for InvitePrivateChatResponse {
 }
 
 impl InvitePrivateChatResponse {
+    pub fn with_chat_messages(self, chat_messages: ChatMessages) -> Self {
+        Self {
+            chat_messages: Some(chat_messages),
+            ..self
+        }
+    }
     pub fn new(
         chat_id: Uuid,
         friend_id: Uuid,
@@ -57,6 +66,7 @@ impl InvitePrivateChatResponse {
             chat_id,
             friend_id,
             friend_user_info,
+            chat_messages: None,
         }
     }
 }
@@ -115,7 +125,8 @@ impl InvitePrivateChatUsecaseInterface for InvitePrivateChatUsecase {
         }
 
         info!("target user found with id: {}", target_user.id);
-        self.chats_service
+        let response = self
+            .chats_service
             .initiate_private_chat(
                 request.user_id.to_string().as_str(),
                 target_user.id.to_string().as_str(),
@@ -123,6 +134,17 @@ impl InvitePrivateChatUsecaseInterface for InvitePrivateChatUsecase {
             .await
             .map_err(GenericError::unknown)
             .map(|chat| InvitePrivateChatResponse::new(chat, target_user.id, user_info))
+            .map_err(|e| GenericError::unknown(e))?;
+
+        info!("chat created with id: {}", response.chat_id);
+        let chat_messsage = self
+            .chats_service
+            .get_messages_of_chat(response.chat_id.to_string().as_str())
+            .await
+            .map_err(|e| GenericError::unknown(e))?;
+
+        let response = response.with_chat_messages(chat_messsage);
+        return Ok(response);
     }
     async fn find_user_info_list(&self, query: &str) -> anyhow::Result<Vec<UserInfo>> {
         self.user_service

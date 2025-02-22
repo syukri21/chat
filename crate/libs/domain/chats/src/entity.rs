@@ -44,6 +44,22 @@ impl Default for Chat {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MessageBox(
+    pub Message,
+    pub Vec<(String, MessageReadReceipt)>,
+    pub Vec<(String, MessageReaction)>,
+);
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ChatMessages {
+    pub chat_id: Uuid,
+    pub chat_name: String,
+    pub is_group: bool,
+    pub messages: Vec<MessageBox>,
+    pub chat_members: Vec<ChatMember>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Message {
     pub id: Uuid,
     pub chat_id: Uuid,
