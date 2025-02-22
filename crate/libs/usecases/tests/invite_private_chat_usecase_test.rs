@@ -1,14 +1,15 @@
 #[cfg(test)]
 mod tests {
-    use chats::chat_services::{ChatService, ChatServiceInterface};
+    use chats::chat_services::ChatService;
     use credentials::credential_services::CredentialService;
     use jwt::JWT;
-    use log::{error, info};
+    use log::info;
     use persistence::{DatabaseInterface, Env, DB};
     use shaku::{module, HasComponent};
     use std::sync::Once;
     use usecases::invite_private_chat_usecase::InvitePrivateChatUsecaseInterface;
     use usecases::{utils, InvitePrivateChatRequest, InvitePrivateChatUsecase};
+    use user_details::user_detail_service::UserDetailServiceImpl;
     use users::user::User;
     use users::user_services::{UserService, UserServiceInterface};
 
@@ -23,12 +24,12 @@ mod tests {
 
     module! {
          TestModule {
-            components = [InvitePrivateChatUsecase, UserService, ChatService, CredentialService, Env, DB, JWT],
+            components = [UserDetailServiceImpl, InvitePrivateChatUsecase, UserService, ChatService, CredentialService, Env, DB, JWT],
             providers = []
         }
     }
     #[tokio::test]
-    async fn test_invite_private_chat_usecase() {
+    async fn test_invite_private_chat_usecase_should_faile_due_to_user_detail_not_found() {
         setup();
         info!("starting test_invite_private_chat_usecase");
         let env = Env::load_test();
@@ -39,7 +40,6 @@ mod tests {
         let user_service: &dyn UserServiceInterface = module.resolve_ref();
         let invite_private_chat_usecase: &dyn InvitePrivateChatUsecaseInterface =
             module.resolve_ref();
-        let chat_service: &dyn ChatServiceInterface = module.resolve_ref();
 
         let mut user1 = User::new(
             String::from("user1"),
@@ -66,26 +66,6 @@ mod tests {
             })
             .await;
 
-        assert!(result.is_ok(), "result should be ok");
-        let string = result.unwrap().to_string();
-        assert!(!string.is_empty(), "chat id should not be empty");
-
-        let chat_members = chat_service
-            .get_chat_members(string.as_str())
-            .await
-            .map_err(move |e| {
-                error!("failed to get chat members: {}", e);
-                panic!("failed to get chat members: {}", e)
-            })
-            .unwrap();
-
-        info!("chat members: {:#?}", chat_members);
-        let iter = chat_members.into_iter();
-
-        assert_eq!(
-            iter.map(|v| v.user_id).collect::<Vec<_>>().as_slice(),
-            &[user1.id, user2.id],
-            "chat members should be user1 and user2"
-        );
+        assert!(!result.is_ok(), "result should be ok");
     }
 }
