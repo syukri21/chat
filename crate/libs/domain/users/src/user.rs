@@ -46,10 +46,53 @@ impl User {
 pub struct UserInfo {
     pub id: Uuid,
     pub username: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub profile_picture: Option<String>,
+}
+
+pub trait UserInfoDisplay {
+    fn get_profile_picture(&self) -> String;
+    fn get_full_name(&self) -> String;
+    fn get_default_profile_picture(&self) -> String;
+    fn get_user_name(&self) -> String;
+}
+
+impl UserInfoDisplay for UserInfo {
+    fn get_profile_picture(&self) -> String {
+        match &self.profile_picture {
+            Some(picture) => picture.to_string(),
+            None => self.get_default_profile_picture(),
+        }
+    }
+    fn get_full_name(&self) -> String {
+        format!("{} {}", self.first_name, self.last_name)
+    }
+    fn get_default_profile_picture(&self) -> String {
+        format!(
+            "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
+            self.get_full_name()
+        )
+    }
+    fn get_user_name(&self) -> String {
+        self.username.to_owned()
+    }
 }
 
 impl UserInfo {
-    pub fn new(id: Uuid, username: String) -> Self {
-        Self { id, username }
+    pub fn new(
+        id: Uuid,
+        username: String,
+        first_name: String,
+        last_name: String,
+        profile_picture: Option<String>,
+    ) -> Self {
+        Self {
+            id,
+            username,
+            first_name,
+            last_name,
+            profile_picture,
+        }
     }
 }

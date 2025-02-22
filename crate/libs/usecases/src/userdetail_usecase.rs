@@ -7,7 +7,10 @@ use commons::generic_errors::GenericError;
 use infer::Infer;
 use shaku::{Component, Interface};
 use user_details::{entity::UserDetail, user_detail_service::UserDetailService};
-use users::{user::User, user_services::UserServiceInterface};
+use users::{
+    user::{User, UserInfoDisplay},
+    user_services::UserServiceInterface,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserInfo {
@@ -24,12 +27,23 @@ impl UserInfo {
             user_details,
         }
     }
+}
 
-    pub fn get_profile_picture(&self) -> String {
+impl UserInfoDisplay for UserInfo {
+    fn get_profile_picture(&self) -> String {
         self.user_details
             .as_ref()
             .and_then(|details| details.profile_picture.clone())
             .unwrap_or_else(|| self.get_default_profile_picture())
+    }
+
+    fn get_full_name(&self) -> String {
+        self.user_details
+            .as_ref()
+            .and_then(|details| {
+                return Some(format!("{} {}", details.first_name, details.last_name));
+            })
+            .unwrap_or_else(|| self.username.clone())
     }
 
     fn get_default_profile_picture(&self) -> String {
@@ -38,14 +52,8 @@ impl UserInfo {
             self.get_full_name()
         )
     }
-
-    pub fn get_full_name(&self) -> String {
-        self.user_details
-            .as_ref()
-            .and_then(|details| {
-                return Some(format!("{} {}", details.first_name, details.last_name));
-            })
-            .unwrap_or_else(|| self.username.clone())
+    fn get_user_name(&self) -> String {
+        self.username.to_owned()
     }
 }
 

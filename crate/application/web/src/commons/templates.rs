@@ -1,6 +1,6 @@
 use minijinja::{context, Environment};
 use shaku::{Component, Interface};
-use usecases::userdetail_usecase;
+use users::user::UserInfoDisplay;
 
 #[derive(Component)]
 #[shaku(interface = JinjaTemplate)]
@@ -41,8 +41,8 @@ impl Default for JinjaTemplateImpl {
 pub trait JinjaTemplate: Interface {
     fn env(&self) -> &Environment<'static>;
     fn something_went_wrong_page(&self) -> String;
-    fn htmx_user_info(&self, user_info: &users::user::UserInfo) -> String;
-    fn htmx_chat_header(&self, user_id: &str, user_info: userdetail_usecase::UserInfo) -> String;
+    fn htmx_user_info(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String;
+    fn htmx_chat_header(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String;
 }
 
 impl JinjaTemplate for JinjaTemplateImpl {
@@ -60,23 +60,20 @@ impl JinjaTemplate for JinjaTemplateImpl {
             .unwrap()
     }
 
-    fn htmx_user_info(&self, user_info: &users::user::UserInfo) -> String {
-        let profile_picture = format!(
-            "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
-            user_info.username
-        );
+    fn htmx_user_info(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String {
         self.env
             .get_template("htmx-user-info")
             .unwrap()
             .render(context! {
-                profile_picture => profile_picture,
-                username => user_info.username,
-                id => user_info.id.to_string(),
+                profile_picture => user_info.get_profile_picture(),
+                username => user_info.get_user_name(),
+                fullname => user_info.get_full_name(),
+                id => user_id,
             })
             .unwrap()
     }
 
-    fn htmx_chat_header(&self, user_id: &str, user_info: userdetail_usecase::UserInfo) -> String {
+    fn htmx_chat_header(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String {
         return self
             .env
             .get_template("htmx-chat-header")
@@ -89,5 +86,4 @@ impl JinjaTemplate for JinjaTemplateImpl {
             })
             .unwrap();
     }
-
 }

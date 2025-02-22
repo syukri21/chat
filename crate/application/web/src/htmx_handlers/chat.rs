@@ -33,8 +33,8 @@ pub async fn find_user_info_list(
     {
         Ok(response) => {
             let response: Vec<String> = response
-                .iter()
-                .map(|user| template.htmx_user_info(user))
+                .into_iter()
+                .map(|user| template.htmx_user_info(user.id.to_string().as_str(), Box::new(user)))
                 .collect();
             ok_builder(response.join(""))
         }
@@ -69,8 +69,9 @@ pub async fn invite_private_chat_usecase(
         .await
         .map_err(|e| error_builder(e, "invite_private_chat_usecase"))
         .map(|val| {
+            let user_info = Box::new(val.friend_user_info);
             let htmx_chat_header =
-                template.htmx_chat_header(val.friend_id.to_string().as_str(), val.friend_user_info);
+                template.htmx_chat_header(val.friend_id.to_string().as_str(), user_info);
             ok_builder([chat_window, htmx_chat_header].join(""))
         })
 }
@@ -89,7 +90,10 @@ pub async fn chat_header(
         .get_user_info(payload.user_id.as_str())
         .await
         .map_err(|e| error_builder(e, "invite_private_chat_usecase"))
-        .map(|user_info| ok_builder(template.htmx_chat_header(payload.user_id.as_str(), user_info)))
+        .map(|user_info| {
+            let user_info = Box::new(user_info);
+            ok_builder(template.htmx_chat_header(payload.user_id.as_str(), user_info))
+        })
 }
 
 fn error_builder(e: anyhow::Error, key: &str) -> http::Response<axum::body::Body> {

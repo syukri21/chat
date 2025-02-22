@@ -156,10 +156,14 @@ impl UserServiceInterface for UserService {
 
         let query = r#"
         SELECT
-            id,
-            username
-        FROM users
-        WHERE is_active = true and (lower(username) LIKE ? or lower(email) LIKE ?)"#;
+            u.id,
+            u.username,
+            ud.first_name,
+            ud.last_name,
+            ud.profile_picture
+        FROM users u
+        LEFT JOIN user_details ud ON u.id = ud.user_id
+        WHERE is_active = true and (lower(u.username) LIKE ? or lower(u.email) LIKE ?)"#;
 
         let result = sqlx::query(query)
             .bind(format!("%{}%", params.to_lowercase()))
@@ -172,6 +176,9 @@ impl UserServiceInterface for UserService {
                 Ok(UserInfo::new( 
                     row.try_get::<String, _>("id")?.parse()?,
                     row.try_get("username")?,
+                    row.try_get("first_name")?,
+                    row.try_get("last_name")?,
+                    row.try_get("profile_picture")?,
                 ))
             })
             .collect()
