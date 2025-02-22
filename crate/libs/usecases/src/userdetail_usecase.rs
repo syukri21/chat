@@ -36,7 +36,6 @@ impl UserInfoDisplay for UserInfo {
             .and_then(|details| details.profile_picture.clone())
             .unwrap_or_else(|| self.get_default_profile_picture())
     }
-
     fn get_full_name(&self) -> String {
         self.user_details
             .as_ref()
@@ -44,13 +43,6 @@ impl UserInfoDisplay for UserInfo {
                 return Some(format!("{} {}", details.first_name, details.last_name));
             })
             .unwrap_or_else(|| self.username.clone())
-    }
-
-    fn get_default_profile_picture(&self) -> String {
-        format!(
-            "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
-            self.get_full_name()
-        )
     }
     fn get_user_name(&self) -> String {
         self.username.to_owned()

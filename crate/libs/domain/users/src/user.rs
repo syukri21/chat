@@ -54,7 +54,12 @@ pub struct UserInfo {
 pub trait UserInfoDisplay {
     fn get_profile_picture(&self) -> String;
     fn get_full_name(&self) -> String;
-    fn get_default_profile_picture(&self) -> String;
+    fn get_default_profile_picture(&self) -> String {
+        format!(
+            "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
+            self.get_full_name()
+        )
+    }
     fn get_user_name(&self) -> String;
 }
 
@@ -67,12 +72,6 @@ impl UserInfoDisplay for UserInfo {
     }
     fn get_full_name(&self) -> String {
         format!("{} {}", self.first_name, self.last_name)
-    }
-    fn get_default_profile_picture(&self) -> String {
-        format!(
-            "https://ui-avatars.com/api/?name={}&background=random&rounded=true",
-            self.get_full_name()
-        )
     }
     fn get_user_name(&self) -> String {
         self.username.to_owned()
