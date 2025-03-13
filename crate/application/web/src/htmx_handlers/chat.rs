@@ -1,17 +1,13 @@
 use std::str::FromStr;
 
-use crate::commons::templates::JinjaTemplate;
-use crate::{utils::render_error_alert, WebModule};
-use axum::{
-    extract::Query,
-    response::{IntoResponse, Response},
-    Extension, Json,
+use crate::commons::{
+    response_builder::{error_builder, ok_builder},
+    templates::JinjaTemplate,
 };
-use commons::generic_errors::GenericError;
-use http::StatusCode;
+use crate::WebModule;
+use axum::{extract::Query, response::IntoResponse, Extension, Json};
 use jwt::AccessClaims;
 use shaku_axum::Inject;
-use tracing::error;
 use usecases::userdetail_usecase::UserDetailUsecase;
 use usecases::InvitePrivateChatUsecaseInterface;
 use uuid::Uuid;
@@ -83,30 +79,8 @@ pub async fn chat_header(
         .get_user_info(payload.user_id.as_str())
         .await
         .map_err(|e| error_builder(e, "invite_private_chat_usecase"))
-        .map(|user_info| {
+        .map(|user_info: usecases::userdetail_usecase::UserInfo| {
             let user_info = Box::new(user_info);
             ok_builder(template.htmx_chat_header(payload.user_id.as_str(), user_info))
         })
-}
-
-fn error_builder(e: anyhow::Error, key: &str) -> http::Response<axum::body::Body> {
-    error!("Error occurred during {}: {}", key, e);
-    let error_message = match e.downcast_ref::<GenericError>() {
-        Some(generic_error) => generic_error.to_string(),
-        None => format!("An error occurred during {}.", key).to_string(),
-    };
-    let error_html = render_error_alert(error_message);
-    Response::builder()
-        .status(StatusCode::BAD_REQUEST)
-        .body(error_html)
-        .unwrap()
-        .into_response()
-}
-
-fn ok_builder(response: String) -> http::Response<axum::body::Body> {
-    Response::builder()
-        .status(StatusCode::OK)
-        .body(response)
-        .unwrap()
-        .into_response()
 }
