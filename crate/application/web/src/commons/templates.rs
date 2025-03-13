@@ -1,4 +1,6 @@
-use chats::entity::ChatMessages;
+use chats::entity::{ChatMessages, MessageBox};
+use chrono::FixedOffset;
+use chrono_humanize::HumanTime;
 use minijinja::{context, Environment};
 use shaku::{Component, Interface};
 use users::user::UserInfoDisplay;
@@ -30,13 +32,21 @@ impl Default for JinjaTemplateImpl {
         // htmx
         const USER_INFO: &str = include_str!("../../page/htmx/user_info.html");
         const CHAT_WINDOW: &str = include_str!("../../page/htmx/chat_window.html");
-        const CHAT_WINDOW_EMPTY: &str = include_str!("../../page/htmx/chat_window_empty.html");
-        const CHAT_HEADER: &str = include_str!("../../page/htmx/chat_header.html");
         env.add_template("htmx-user-info", USER_INFO).unwrap();
         env.add_template("htmx-chat-window", CHAT_WINDOW).unwrap();
-        env.add_template("htmx-chat-window-empty", CHAT_WINDOW_EMPTY).unwrap();
+
+        const CHAT_WINDOW_EMPTY: &str = include_str!("../../page/htmx/chat_window_empty.html");
+        env.add_template("htmx-chat-window-empty", CHAT_WINDOW_EMPTY)
+            .unwrap();
+
+        const CHAT_HEADER: &str = include_str!("../../page/htmx/chat_header.html");
         env.add_template("htmx-chat-header", CHAT_HEADER).unwrap();
 
+        const MESSAGE_BOX: &str = include_str!("../../page/htmx/message_box.html");
+        env.add_template("htmx-message-box", MESSAGE_BOX).unwrap();
+
+        const CHAT_FORM_BOX: &str = include_str!("../../page/htmx/chat_form_box.html");
+        env.add_template("chat-form-box", CHAT_FORM_BOX).unwrap();
         JinjaTemplateImpl { env }
     }
 }
@@ -47,6 +57,8 @@ pub trait JinjaTemplate: Interface {
     fn htmx_user_info(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String;
     fn htmx_chat_header(&self, user_id: &str, user_info: Box<dyn UserInfoDisplay>) -> String;
     fn htmx_chat_box(&self, chat_messages: &Option<ChatMessages>) -> String;
+    fn htmx_message_box(&self, message: &MessageBox) -> String;
+    fn htmx_chat_form_box(&self, chat_id: &str) -> String;
 }
 
 impl JinjaTemplate for JinjaTemplateImpl {
@@ -104,6 +116,34 @@ impl JinjaTemplate for JinjaTemplateImpl {
             .get_template("htmx-chat-window")
             .unwrap()
             .render(context! {})
+            .unwrap()
+    }
+
+    fn htmx_message_box(&self, message: &MessageBox) -> String {
+        let sent_at = message.0.sent_at.unwrap();
+        let tz = FixedOffset::east_opt(7 * 3600).unwrap();
+        let sent_at = sent_at.and_local_timezone(tz).unwrap();
+        let sent_at = HumanTime::from(sent_at).to_string();
+        self.env
+            .get_template("htmx-message-box")
+            .unwrap()
+            .render(context! {
+                message => message.0.content,
+                sender_id => message.0.sender_id.to_string(),
+                message_id => message.0.id.to_string(),
+                message_type => message.0.message_type,
+                sent_at => sent_at,
+            })
+            .unwrap()
+    }
+
+    fn htmx_chat_form_box(&self, chat_id: &str) -> String {
+        self.env
+            .get_template("chat-form-box")
+            .unwrap()
+            .render(context! {
+                chat_id => chat_id,
+            })
             .unwrap()
     }
 }

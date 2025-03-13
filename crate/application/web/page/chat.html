@@ -113,8 +113,10 @@
 
       <!-- Input Box -->
       <div class="bg-blue-50 p-3">
-        <form id="chatForm" class="flex items-center space-x-2">
-          <input type="text" id="messageInput"
+        <form id="chatForm" class="flex items-center space-x-2" hx-post="/htmx/chat-send" hx-target="#chat-window"
+          hx-swap="beforeend">
+          <input type="hidden" name="chat_id" value="1">
+          <input type="text" id="message"
             class="flex-1 px-4 py-2 rounded-full border-0 focus:outline-none focus:ring-1 focus:ring-blue-600"
             placeholder="Type a message" required>
           <button type="submit" class="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700">
@@ -125,6 +127,7 @@
           </button>
         </form>
       </div>
+
     </div>
   </div>
 

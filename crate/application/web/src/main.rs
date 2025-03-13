@@ -33,6 +33,7 @@ use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 use tracing::{debug, info_span, Span};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use usecases::chat_usecase::ChatUsecaseImpl;
 use usecases::userdetail_usecase::UserDetailUsecaseImpl;
 use usecases::{InvitePrivateChatUsecase, LoginUseCase, LoginUseCaseInterface, RegisterUseCase};
 use user_details::user_detail_service::UserDetailServiceImpl;
@@ -66,6 +67,7 @@ module! {
             UserDetailServiceImpl,
             UserDetailUsecaseImpl,
             UserService,
+            ChatUsecaseImpl,
         ],
 
         providers = []
@@ -99,6 +101,7 @@ async fn main() {
         .route("/register", post(register::register))
         .route("/find-users", get(chat::find_user_info_list))
         .route("/chat-header", get(chat::chat_header))
+        .route("/chat-send", post(chat::chat_send))
         .route(
             "/invite-private-chat",
             post(chat::invite_private_chat_usecase),
@@ -155,7 +158,7 @@ fn tracing_init() {
                 // axum logs rejections from built-in extractors with the `axum::rejection`
                 // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
                 format!(
-                    "{}=debug,user_details=debug,tower_http=debug,axum::rejection=trace,mail=debug,commons=debug,sessions=debug,usecases=info",
+                    "{}=debug,chats=debug,user_details=debug,tower_http=debug,axum::rejection=trace,mail=debug,commons=debug,sessions=debug,usecases=info",
                     env!("CARGO_CRATE_NAME")
                 )
                 .into()

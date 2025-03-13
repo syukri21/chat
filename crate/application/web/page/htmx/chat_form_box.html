@@ -1,0 +1,13 @@
+<!-- Input Box -->
+<form id="chatForm" class="flex items-center space-x-2" hx-post="/htmx/chat-send" hx-target="#chat-window"
+  hx-swap="beforeend" hx-swap-oob="true" hx-swap="outerHTML">
+  <input type="hidden" name="chat_id" value="{{ chat_id }}">
+  <input type="text" id="message" name="message"
+    class="flex-1 px-4 py-2 rounded-full border-0 focus:outline-none focus:ring-1 focus:ring-blue-600"
+    placeholder="Type a message" required>
+  <button type="submit" class="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  </button>
+</form>

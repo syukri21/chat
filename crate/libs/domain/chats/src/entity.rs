@@ -70,6 +70,36 @@ pub struct Message {
     pub sent_at: Option<chrono::NaiveDateTime>,
 }
 
+impl Message {
+    pub fn new(
+        chat_id: Uuid,
+        sender_id: Uuid,
+        content: String,
+        message_type: String,
+        message_key: String,
+    ) -> Self {
+        Self {
+            id: Uuid::new_v4(),
+            chat_id,
+            sender_id,
+            content,
+            message_type,
+            message_key,
+            sent_at: Option::from(chrono::Local::now().naive_local()),
+        }
+    }
+
+    pub fn new_private_message(chat_id: Uuid, sender_id: Uuid, content: String) -> Self {
+        Self::new(
+            chat_id,
+            sender_id,
+            content,
+            "private".to_string(),
+            "dummy_key".to_string(),
+        )
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ChatMember {
     pub id: Uuid,

@@ -20,6 +20,12 @@ pub trait ChatServiceInterface: Interface {
     async fn get_chat_members(&self, chat_id: &str) -> anyhow::Result<Vec<ChatMember>>;
     async fn is_chat_exist(&self, user1_id: &str, user2_id: &str) -> anyhow::Result<Option<Chat>>;
     async fn get_messages_of_chat(&self, chat_id: &str) -> anyhow::Result<ChatMessages>;
+    async fn send_message_to_chat(
+        &self,
+        chat_id: &str,
+        sender_id: &str,
+        message: &str,
+    ) -> anyhow::Result<MessageBox>;
 }
 
 #[derive(Component)]
@@ -195,6 +201,52 @@ impl ChatServiceInterface for ChatService {
             messages,
             chat_members: Vec::new(),
         })
+    }
+
+    async fn send_message_to_chat(
+        &self,
+        chat_id: &str,
+        sender_id: &str,
+        message: &str,
+    ) -> anyhow::Result<MessageBox> {
+        let mut pool = self.db.get_pool().acquire().await?;
+        let chat_id = Uuid::from_str(chat_id)?;
+        let sender_id = Uuid::from_str(sender_id)?;
+        log::info!("Sending message to chat: {}, from sender: {}", chat_id, sender_id);
+        let message = Message::new_private_message(chat_id, sender_id, message.to_owned());
+        let query = r#"INSERT INTO messages (
+            id,
+            chat_id,
+            sender_id,
+            content,
+            message_type,
+            message_key,
+            sent_at
+        ) VALUES (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
+        )"#;
+
+        sqlx::query(query)
+            .bind(message.id.to_string())
+            .bind(message.chat_id.to_string())
+            .bind(message.sender_id.to_string())
+            .bind(message.content.clone())
+            .bind(message.message_type.clone())
+            .bind(message.message_key.clone())
+            .bind(message.sent_at)
+            .execute(&mut *pool)
+            .await?;
+
+        // TODO: implement reaction and read receipt
+        let recipients = Vec::new();
+        let reactions = Vec::new();
+        Ok(MessageBox(message, recipients, reactions))
     }
 }
 

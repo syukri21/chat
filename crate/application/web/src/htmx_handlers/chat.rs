@@ -5,11 +5,11 @@ use crate::commons::{
     templates::JinjaTemplate,
 };
 use crate::WebModule;
-use axum::{extract::Query, response::IntoResponse, Extension, Json};
+use axum::{extract::Query, response::IntoResponse, Extension, Form, Json};
 use jwt::AccessClaims;
 use shaku_axum::Inject;
-use usecases::userdetail_usecase::UserDetailUsecase;
 use usecases::InvitePrivateChatUsecaseInterface;
+use usecases::{chat_usecase::ChatUsecase, userdetail_usecase::UserDetailUsecase};
 use uuid::Uuid;
 
 #[derive(serde::Deserialize)]
@@ -61,7 +61,8 @@ pub async fn invite_private_chat_usecase(
             let friend_id = val.friend_id.to_string();
             let htmx_chat_header = template.htmx_chat_header(&friend_id, user_info);
             let htmx_chat_box = template.htmx_chat_box(&val.chat_messages);
-            ok_builder([htmx_chat_box, htmx_chat_header].join(""))
+            let htmx_chat_form_box = template.htmx_chat_form_box(&val.chat_id.to_string());
+            ok_builder([htmx_chat_box, htmx_chat_header, htmx_chat_form_box].join(""))
         })
 }
 
@@ -82,5 +83,31 @@ pub async fn chat_header(
         .map(|user_info: usecases::userdetail_usecase::UserInfo| {
             let user_info = Box::new(user_info);
             ok_builder(template.htmx_chat_header(payload.user_id.as_str(), user_info))
+        })
+}
+
+#[derive(Default, Debug, serde::Deserialize)]
+pub struct ChatSendRequest {
+    pub chat_id: String,
+    pub message: String,
+}
+
+pub async fn chat_send(
+    chat_usecase: Inject<WebModule, dyn ChatUsecase>,
+    claim: Extension<AccessClaims>,
+    template: Inject<WebModule, dyn JinjaTemplate>,
+    Form(payload): Form<ChatSendRequest>,
+) -> impl IntoResponse {
+    chat_usecase
+        .send_message_to_chat(
+            payload.chat_id.as_str(),
+            &claim.user_id,
+            payload.message.as_str(),
+        )
+        .await
+        .map_err(|e| error_builder(e, "chat_send"))
+        .map(|val| {
+            let htmx_chat_box = template.htmx_message_box(&val);
+            ok_builder(htmx_chat_box)
         })
 }
